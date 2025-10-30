@@ -20,6 +20,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
     ${PostgreSQL_INCLUDE_DIRS}
+    ${Protobuf_INCLUDE_DIRS}
 )
 
 # Subdirectories

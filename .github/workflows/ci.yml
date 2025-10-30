@@ -15,9 +15,9 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           ./vcpkg/bootstrap-vcpkg.sh
-      - name: Install Boost 1.82 via vcpkg
+      - name: Install dependencies via vcpkg
         run: |
-          ./vcpkg/vcpkg install boost-system:x64-linux
+          ./vcpkg/vcpkg install boost-system:x64-linux protobuf:x64-linux
       - name: Configure vcpkg environment
         run: |
           echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
