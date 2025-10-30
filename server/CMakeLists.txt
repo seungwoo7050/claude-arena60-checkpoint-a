@@ -12,7 +12,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 # Find packages (CONFIG mode for vcpkg)
 find_package(Boost REQUIRED COMPONENTS system CONFIG)
-find_package(libpq CONFIG REQUIRED)
+find_package(libpq CONFIG)
+if(NOT libpq_FOUND)
+    find_package(PostgreSQL REQUIRED)
+    add_library(libpq::pq ALIAS PostgreSQL::PostgreSQL)
+endif()
 find_package(Protobuf CONFIG REQUIRED)
 
 # Include directories
