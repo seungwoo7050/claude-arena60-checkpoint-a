@@ -1,3 +1,35 @@
-add_subdirectory(unit)
-add_subdirectory(integration)
-add_subdirectory(performance)
+find_package(GTest CONFIG REQUIRED)
+
+# Unit tests
+file(GLOB_RECURSE UNIT_TEST_SOURCES "unit/*.cpp")
+add_executable(unit_tests ${UNIT_TEST_SOURCES})
+target_link_libraries(unit_tests PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Boost::system
+)
+add_test(NAME UnitTests COMMAND unit_tests)
+set_tests_properties(UnitTests PROPERTIES LABELS "unit")
+
+# Integration tests
+file(GLOB_RECURSE INTEGRATION_TEST_SOURCES "integration/*.cpp")
+add_executable(integration_tests ${INTEGRATION_TEST_SOURCES})
+target_link_libraries(integration_tests PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Boost::system
+    libpq::pq
+)
+add_test(NAME IntegrationTests COMMAND integration_tests)
+set_tests_properties(IntegrationTests PROPERTIES LABELS "integration")
+
+# Performance tests
+file(GLOB_RECURSE PERFORMANCE_TEST_SOURCES "performance/*.cpp")
+add_executable(performance_tests ${PERFORMANCE_TEST_SOURCES})
+target_link_libraries(performance_tests PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Boost::system
+)
+add_test(NAME PerformanceTests COMMAND performance_tests)
+set_tests_properties(PerformanceTests PROPERTIES LABELS "performance")

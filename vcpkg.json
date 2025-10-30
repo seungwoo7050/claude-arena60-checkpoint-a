@@ -1,0 +1,14 @@
+{
+  "name": "arena60",
+  "version": "1.0.0",
+  "dependencies": [
+    "boost-system",
+    "boost-asio",
+    "gtest",
+    "protobuf",
+    {
+      "name": "libpq",
+      "platform": "linux"
+    }
+  ]
+}
