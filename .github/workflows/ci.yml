@@ -12,9 +12,13 @@ jobs:
     env:
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       VCPKG_DEFAULT_TRIPLET: x64-linux
-    
+
     steps:
     - uses: actions/checkout@v3
+
+    - name: Clear vcpkg cache on retry
+      if: ${{ github.run_attempt > 1 }}
+      run: rm -rf "${{ env.VCPKG_ROOT }}"
 
     - name: Cache vcpkg
       uses: actions/cache@v3
@@ -33,7 +37,7 @@ jobs:
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
         cd "${{ github.workspace }}"
-        "${VCPKG_ROOT}/vcpkg" install
+        "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
       run: |
@@ -61,6 +65,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_TRIPLET: x64-linux
     
     services:
       postgres:
@@ -85,6 +90,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Clear vcpkg cache on retry
+      if: ${{ github.run_attempt > 1 }}
+      run: rm -rf "${{ env.VCPKG_ROOT }}"
+
     - name: Cache vcpkg
       uses: actions/cache@v3
       with:
@@ -102,7 +111,7 @@ jobs:
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
         cd "${{ github.workspace }}"
-        "${VCPKG_ROOT}/vcpkg" install
+        "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
       run: |
@@ -134,9 +143,14 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_TRIPLET: x64-linux
     
     steps:
     - uses: actions/checkout@v3
+
+    - name: Clear vcpkg cache on retry
+      if: ${{ github.run_attempt > 1 }}
+      run: rm -rf "${{ env.VCPKG_ROOT }}"
 
     - name: Cache vcpkg
       uses: actions/cache@v3
@@ -155,7 +169,7 @@ jobs:
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
         cd "${{ github.workspace }}"
-        "${VCPKG_ROOT}/vcpkg" install
+        "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
       run: |
@@ -187,9 +201,14 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_TRIPLET: x64-linux
     
     steps:
     - uses: actions/checkout@v3
+
+    - name: Clear vcpkg cache on retry
+      if: ${{ github.run_attempt > 1 }}
+      run: rm -rf "${{ env.VCPKG_ROOT }}"
 
     - name: Cache vcpkg
       uses: actions/cache@v3
@@ -208,7 +227,7 @@ jobs:
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
         cd "${{ github.workspace }}"
-        "${VCPKG_ROOT}/vcpkg" install
+        "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
       run: |
