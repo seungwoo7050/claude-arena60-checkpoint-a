@@ -1,12 +1,3 @@
----
-name: "Arena60 - Production Battle Arena Games"
-description: "Three production-quality games: 1v1 Duel, 60-player Battle Royale, Esports Platform"
-category: "Backend Service / Game Server"
-author: "Arena60 Project - Phase 2"
-tags: ["c++", "game-server", "production", "portfolio", "korean-game-industry"]
-lastUpdated: "2025-01-30"
----
-
 # Arena60 – Production Battle Arena Games
 
 ## Project Overview
