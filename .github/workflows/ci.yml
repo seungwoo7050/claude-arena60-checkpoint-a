@@ -26,7 +26,7 @@ jobs:
         path: |
           ${{ env.VCPKG_ROOT }}
           ~/.cache/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('server/vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
@@ -36,7 +36,7 @@ jobs:
           git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
-        cd "${{ github.workspace }}"
+        cd "${{ github.workspace }}/server"
         "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
@@ -100,7 +100,7 @@ jobs:
         path: |
           ${{ env.VCPKG_ROOT }}
           ~/.cache/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('server/vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
@@ -110,7 +110,7 @@ jobs:
           git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
-        cd "${{ github.workspace }}"
+        cd "${{ github.workspace }}/server"
         "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
@@ -158,7 +158,7 @@ jobs:
         path: |
           ${{ env.VCPKG_ROOT }}
           ~/.cache/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('server/vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
@@ -168,7 +168,7 @@ jobs:
           git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
-        cd "${{ github.workspace }}"
+        cd "${{ github.workspace }}/server"
         "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
@@ -216,7 +216,7 @@ jobs:
         path: |
           ${{ env.VCPKG_ROOT }}
           ~/.cache/vcpkg
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('server/vcpkg.json', 'vcpkg-configuration.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-
 
@@ -226,7 +226,7 @@ jobs:
           git clone --depth 1 https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
           "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
         fi
-        cd "${{ github.workspace }}"
+        cd "${{ github.workspace }}/server"
         "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
     - name: Install dependencies
