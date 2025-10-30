@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.20)
+project(arena60 VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+# Find packages
+find_package(Boost 1.82 REQUIRED COMPONENTS system)
+find_package(PostgreSQL REQUIRED)
+find_package(Protobuf REQUIRED)
+
+# Include directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIRS}
+    ${PostgreSQL_INCLUDE_DIRS}
+)
+
+# Subdirectories
+add_subdirectory(src)
+add_subdirectory(tests)
+
+# Enable testing
+enable_testing()

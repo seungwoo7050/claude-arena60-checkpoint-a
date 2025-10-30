@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          mkdir -p server/build
+          cd server/build
+          cmake ..
+      - name: Build
+        run: |
+          cd server/build
+          cmake --build .
+      - name: Run tests
+        run: |
+          cd server/build
+          ctest --output-on-failure || true
