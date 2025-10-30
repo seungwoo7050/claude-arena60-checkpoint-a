@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'arena60_server'
+    static_configs:
+      - targets: ['arena60-server:9100']

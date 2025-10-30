@@ -1,0 +1,1 @@
+add_library(arena60_performance_tests INTERFACE)

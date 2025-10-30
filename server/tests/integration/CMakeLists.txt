@@ -1,0 +1,1 @@
+add_library(arena60_integration_tests INTERFACE)

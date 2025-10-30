@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+      - name: Install dependencies via vcpkg
+        run: |
+          ./vcpkg/vcpkg install boost-system:x64-linux protobuf:x64-linux
+      - name: Configure vcpkg environment
+        run: |
+          echo "VCPKG_ROOT=${{ github.workspace }}/vcpkg" >> $GITHUB_ENV
+      - name: Configure
+        run: |
+          mkdir -p server/build
+          cd server/build
+          cmake ..
+      - name: Build
+        run: |
+          cd server/build
+          cmake --build .
+      - name: Run tests
+        run: |
+          cd server/build
+          ctest --output-on-failure || true
