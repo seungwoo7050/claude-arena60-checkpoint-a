@@ -4,6 +4,11 @@ add_library(arena60_lib
     game/combat.cpp
     game/game_session.cpp
     game/projectile.cpp
+    matchmaking/match.cpp
+    matchmaking/match_request.cpp
+    matchmaking/match_queue.cpp
+    matchmaking/matchmaker.cpp
+    matchmaking/match_notification_channel.cpp
     network/metrics_http_server.cpp
     network/websocket_server.cpp
     storage/postgres_storage.cpp
