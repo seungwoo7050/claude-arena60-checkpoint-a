@@ -1,12 +1,13 @@
 project: Arena60
 phase: 2
-version: "0.0.0"
-checkpoint: null
+version: "1.0.0"
+checkpoint: "A"
 mvp:
-  current: null
-  completed: []
+  current: "1.0"
+  completed:
+    - "1.0"
 checkpoints:
   completed: []
 phase1_completed: true
 initialized_at: "2025-10-30T16:12:50Z"
-last_updated: "2025-10-30T16:12:50Z"
+last_updated: "2025-10-31T12:50:03Z"

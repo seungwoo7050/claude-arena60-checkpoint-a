@@ -14,7 +14,7 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: x64-linux
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Clear vcpkg cache on retry
       if: ${{ github.run_attempt > 1 }}
@@ -88,7 +88,7 @@ jobs:
           - 6379:6379
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Clear vcpkg cache on retry
       if: ${{ github.run_attempt > 1 }}
@@ -146,7 +146,7 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: x64-linux
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Clear vcpkg cache on retry
       if: ${{ github.run_attempt > 1 }}
@@ -176,13 +176,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y clang-format clang-tidy
     
-    - name: Check format
+    - name: clang-format check
       run: |
-        FILES=$(find server/src server/include -name '*.cpp' -o -name '*.h' 2>/dev/null || true)
-        if [ -n "$FILES" ]; then
-          echo "$FILES" | xargs clang-format --dry-run --Werror
-        else
-          echo "No files to format yet"
+        git ls-files "**/*.[ch]pp" "**/*.h" "**/*.c" "**/*.cc" "**/*.cpp" \
+          | xargs -r clang-format -i
+        if ! git diff --exit-code; then
+          echo "::error::Code not formatted. Run clang-format."; exit 1
         fi
 
     - name: Run clang-tidy
@@ -204,7 +203,7 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: x64-linux
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Clear vcpkg cache on retry
       if: ${{ github.run_attempt > 1 }}
@@ -232,41 +231,30 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libpq-dev lcov bc
-    
+        sudo apt-get install -y libpq-dev python3-pip
+        python3 -m pip install --upgrade --user gcovr
+
     - name: Build with coverage
       run: |
-        cd server
-        mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug \
-              -DCMAKE_CXX_FLAGS="--coverage" \
-              -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" ..
-        make -j$(nproc)
+        cmake -S server -B server/build -DCMAKE_BUILD_TYPE=Debug \
+              -DENABLE_COVERAGE=ON \
+              -DCMAKE_TOOLCHAIN_FILE="${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        cmake --build server/build -- -j$(nproc)
 
     - name: Run tests
+      run: ctest --test-dir server/build --output-on-failure
+
+    - name: Coverage report
       run: |
-        cd server/build
-        ctest
-    
-    - name: Generate coverage report
-      run: |
-        cd server/build
-        lcov --capture --directory . --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' '*/tests/*' '*/vcpkg/*' --output-file coverage.info
-        genhtml coverage.info --output-directory coverage
-    
+        python3 -m gcovr --object-directory server/build --root . \
+          --filter 'server/src' --exclude-directories 'server/build/CMakeFiles' \
+          --exclude-directories 'server/build/Testing' --xml coverage.xml \
+          --html-details coverage.html --fail-under-line 70
+        mkdir -p docs/evidence/mvp-1.0/coverage
+        cp coverage.html docs/evidence/mvp-1.0/coverage/index.html
+
     - name: Upload coverage
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: server/build/coverage/
-    
-    - name: Check coverage threshold
-      run: |
-        cd server/build
-        COVERAGE=$(lcov --summary coverage.info 2>&1 | grep -oP 'lines......: \K[0-9.]+' || echo "0")
-        echo "Coverage: ${COVERAGE}%"
-        if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-          echo "⚠️  Coverage ${COVERAGE}% is below 70% (expected in early development)"
-          # Don't fail in P2-B, only warn
-        fi
+        path: docs/evidence/mvp-1.0/coverage/

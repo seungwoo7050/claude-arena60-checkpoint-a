@@ -1,0 +1,17 @@
+Internal ctest changing into directory: /workspace/codex-arena60/server/build
+Test project /workspace/codex-arena60/server/build
+    Start 1: UnitTests
+1/3 Test #1: UnitTests ........................   Passed    0.34 sec
+    Start 2: IntegrationTests
+2/3 Test #2: IntegrationTests .................   Passed    1.75 sec
+    Start 3: PerformanceTests
+3/3 Test #3: PerformanceTests .................   Passed    2.04 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Label Time Summary:
+integration    =   1.75 sec*proc (1 test)
+performance    =   2.04 sec*proc (1 test)
+unit           =   0.34 sec*proc (1 test)
+
+Total Test time (real) =   4.14 sec

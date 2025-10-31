@@ -10,21 +10,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
+option(ENABLE_COVERAGE "Enable coverage" OFF)
+if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()
+
 # Find packages (CONFIG mode for vcpkg)
-find_package(Boost REQUIRED COMPONENTS system CONFIG)
+find_package(Boost REQUIRED COMPONENTS system)
 find_package(libpq CONFIG)
 if(NOT libpq_FOUND)
     find_package(PostgreSQL REQUIRED)
     add_library(libpq::pq ALIAS PostgreSQL::PostgreSQL)
 endif()
-find_package(Protobuf CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Subdirectories
+enable_testing()
+
 add_subdirectory(src)
 add_subdirectory(tests)
-
-# Enable testing
-enable_testing()
