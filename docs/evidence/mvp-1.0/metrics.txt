@@ -1,0 +1,4 @@
+# TYPE game_tick_rate gauge
+game_tick_rate 59.9084
+# TYPE game_tick_duration_seconds gauge
+game_tick_duration_seconds 0.0166922

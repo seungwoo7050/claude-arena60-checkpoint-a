@@ -8,6 +8,8 @@ if(UNIT_TEST_SOURCES)
         GTest::gtest
         GTest::gtest_main
         Boost::system
+        libpq::pq
+        arena60_lib
     )
     add_test(NAME UnitTests COMMAND unit_tests)
     set_tests_properties(UnitTests PROPERTIES LABELS "unit")
@@ -22,6 +24,7 @@ if(INTEGRATION_TEST_SOURCES)
         GTest::gtest_main
         Boost::system
         libpq::pq
+        arena60_lib
     )
     add_test(NAME IntegrationTests COMMAND integration_tests)
     set_tests_properties(IntegrationTests PROPERTIES LABELS "integration")
@@ -35,6 +38,7 @@ if(PERFORMANCE_TEST_SOURCES)
         GTest::gtest
         GTest::gtest_main
         Boost::system
+        arena60_lib
     )
     add_test(NAME PerformanceTests COMMAND performance_tests)
     set_tests_properties(PerformanceTests PROPERTIES LABELS "performance")
