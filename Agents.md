@@ -16,7 +16,7 @@ Phase 2 of Arena60: Build three production-quality games for Korean game industr
 
 ## Tech Stack
 
-**Core**: C++17, boost.asio/beast 1.82+, PostgreSQL 15+, Redis 7+, Protocol Buffers 3.21+  
+**Core**: C++17, boost.asio/beast 1.82+, PostgreSQL 15+, Redis 7+, Protocol Buffers 3.21+, boost::lockfree 1.82+  
 **Infrastructure**: Kafka 3.5+, Prometheus, Grafana, Docker, Kubernetes  
 **Build**: CMake 3.20+, GCC 11+/Clang 14+, Google Test  
 **Target**: Nexon, Krafton, Netmarble, Kakao Games (100% match)
@@ -24,6 +24,8 @@ Phase 2 of Arena60: Build three production-quality games for Korean game industr
 ## Project Structure
 
 ```
+# No binary files in repository
+
 arena60/
 ├── server/
 │   ├── src/
@@ -125,12 +127,19 @@ arena60/
 - Spatial partitioning (quadtree/grid)
 - Delta compression (state updates)
 - Performance optimization
+- Object pool (Projectile, Reuse Item)
+- Interest Management (View-Based Filtering)
+- **Performance Targets (MVP 2.0)**:
+    - Object reuse rate: ≥ 90%
+    - Packet filtering: ≥ 80% reduction
+    - Memory allocation: < 100 allocs/sec
 
 **MVP 2.1**: Skills System
 - 3 unique abilities per player
 - Cooldown management
 - Skill effects (Dash, Shield, Area Blast)
 - Server-side validation
+- Component-based design pattern
 
 **MVP 2.2**: Item & Loot
 - Collectible items (health, weapons, buffs)
@@ -154,7 +163,11 @@ arena60/
 - In-game currency (coins)
 - Shop system (skins, emotes)
 - Kafka event pipeline
+- Lock-free queue (boost::lockfree)
 - Event consumers (analytics, replay)
+- **Performance Targets (MVP 2.5)**:
+    - Queue contention: < 1ms p99
+    - Throughput: ≥ 10k events/sec
 
 ### Deliverables
 
@@ -341,6 +354,13 @@ Closes #12
 - `player_actions_total`: Inputs processed
 - `database_query_duration_seconds`: DB latency
 
+**Checkpoint B additions**:
+- `object_pool_reuse_rate`: Reuse percentage
+- `object_pool_active_count`: Currently in use
+- `interest_management_filtered_ratio`: Packet reduction
+- `lockfree_queue_contention_ms`: p99 wait time
+- `lockfree_queue_throughput`: Events/sec
+
 ### Grafana Dashboards
 
 **Checkpoint A** (8+ panels):
@@ -356,6 +376,9 @@ Closes #12
 **Checkpoint B** (12+ panels):
 - Add: Spatial partition metrics
 - Kafka throughput
+- Object pool metrics (reuse rate, active/free)
+- Interest management (filtered packets, AOI updates)
+- Lock-free queue (contention, latency)
 - Item spawn rate
 - Player density heatmap
 
@@ -405,18 +428,3 @@ Closes #12
 **Learning**:
 - [Game Programming Patterns](https://gameprogrammingpatterns.com/)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/)
-
-## Changelog
-
-### v4.0 (2025-01-30)
-- Separated Phase 1 and 2
-- Restructured to follow best practices
-- Added .meta/state.yml for version tracking
-- Enhanced quality gates
-
----
-
-**Target**: Korean Game Server Developer (Entry → Senior)  
-**Tech Match**: 100% with Nexon, Krafton, Netmarble, Kakao Games
-
-**For execution**: See `phase2-prompts.md`
