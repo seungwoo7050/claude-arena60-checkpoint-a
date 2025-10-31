@@ -12,6 +12,7 @@ struct MovementInput {
     bool right{false};
     double mouse_x{0.0};
     double mouse_y{0.0};
+    bool fire{false};
 };
 
 }  // namespace arena60

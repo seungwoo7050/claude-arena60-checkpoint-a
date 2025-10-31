@@ -60,7 +60,7 @@ TEST(WebSocketServerIntegrationTest, ProcessesInputAndReturnsState) {
         boost::beast::multi_buffer buffer;
         const auto start = std::chrono::steady_clock::now();
         std::ostringstream frame;
-        frame << "input player1 " << (i + 1) << " 1 0 0 0 1.0 0.0";
+        frame << "input player1 " << (i + 1) << " 1 0 0 0 1.0 0.0 0";
         ws.write(boost::asio::buffer(frame.str()));
         ws.read(buffer);
         const auto elapsed =
@@ -68,7 +68,20 @@ TEST(WebSocketServerIntegrationTest, ProcessesInputAndReturnsState) {
         rtts_ms.push_back(elapsed.count());
 
         const std::string payload = boost::beast::buffers_to_string(buffer.data());
-        EXPECT_TRUE(payload.rfind("state", 0) == 0);
+        std::istringstream resp(payload);
+        std::string type;
+        resp >> type;
+        EXPECT_EQ(type, "state");
+        std::string player_id;
+        double x = 0.0, y = 0.0, angle = 0.0, delta = 0.0;
+        std::uint64_t tick = 0;
+        int health = 0;
+        int alive = 0;
+        resp >> player_id >> x >> y >> angle >> tick >> delta >> health >> alive;
+        EXPECT_TRUE(resp.good() || resp.eof());
+        EXPECT_EQ(player_id, "player1");
+        EXPECT_GE(health, 0);
+        EXPECT_TRUE(alive == 0 || alive == 1);
     }
 
     boost::system::error_code close_error;

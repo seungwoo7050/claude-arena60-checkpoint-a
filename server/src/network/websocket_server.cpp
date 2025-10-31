@@ -3,6 +3,7 @@
 #include <atomic>
 #include <boost/asio/post.hpp>
 #include <iostream>
+#include <limits>
 #include <queue>
 #include <sstream>
 
@@ -48,22 +49,43 @@ class WebSocketServer::ClientSession
         });
     }
 
+    void EnqueueDeath(const std::string& player_id, std::uint64_t tick) {
+        auto self = shared_from_this();
+        boost::asio::post(ws_.get_executor(),
+                          [self, player_id, tick]() { self->DoEnqueueDeath(player_id, tick); });
+    }
+
     const std::string& player_id() const { return player_id_; }
 
    private:
     void DoEnqueueState(const PlayerState& state, std::uint64_t tick, double delta) {
         std::ostringstream oss;
         oss << "state " << state.player_id << ' ' << state.x << ' ' << state.y << ' '
-            << state.facing_radians << ' ' << tick << ' ' << delta;
+            << state.facing_radians << ' ' << tick << ' ' << delta << ' ' << state.health << ' '
+            << (state.is_alive ? 1 : 0) << ' ' << state.shots_fired << ' ' << state.hits_landed
+            << ' ' << state.deaths;
+        QueueMessage(oss.str());
+    }
+
+    void DoEnqueueDeath(const std::string& player_id, std::uint64_t tick) {
+        std::ostringstream oss;
+        oss << "death " << player_id << ' ' << tick;
+        QueueMessage(oss.str());
+    }
+
+    void QueueMessage(std::string message) {
+        bool should_write = false;
         {
             std::lock_guard<std::mutex> lk(write_mutex_);
-            write_queue_.push(oss.str());
-            if (writing_) {
-                return;
+            write_queue_.push(std::move(message));
+            if (!writing_) {
+                writing_ = true;
+                should_write = true;
             }
-            writing_ = true;
         }
-        DoWrite();
+        if (should_write) {
+            DoWrite();
+        }
     }
 
     void DoWrite() {
@@ -146,16 +168,26 @@ class WebSocketServer::ClientSession
         if (type != "input") {
             return false;
         }
-        int up = 0, down = 0, left = 0, right = 0;
+        int up = 0, down = 0, left = 0, right = 0, fire = 0;
         iss >> player_id >> input.sequence >> up >> down >> left >> right >> input.mouse_x >>
             input.mouse_y;
         if (!iss) {
             return false;
         }
+        if (!(iss >> fire)) {
+            fire = 0;
+            if (!iss.eof()) {
+                iss.clear();
+                iss.ignore(std::numeric_limits<std::streamsize>::max());
+            } else {
+                iss.clear();
+            }
+        }
         input.up = up != 0;
         input.down = down != 0;
         input.left = left != 0;
         input.right = right != 0;
+        input.fire = fire != 0;
         return true;
     }
 
@@ -219,6 +251,7 @@ std::string WebSocketServer::MetricsSnapshot() const {
     std::ostringstream oss;
     oss << "# TYPE websocket_connections_total gauge\n";
     oss << "websocket_connections_total " << connection_count_.load() << "\n";
+    oss << session_.MetricsSnapshot();
     return oss.str();
 }
 
@@ -245,6 +278,9 @@ void WebSocketServer::DoAccept() {
 }
 
 void WebSocketServer::BroadcastState(std::uint64_t tick, double delta_seconds) {
+    session_.Tick(tick, delta_seconds);
+    auto death_events = session_.ConsumeDeathEvents();
+
     std::vector<std::shared_ptr<ClientSession>> alive;
     {
         std::lock_guard<std::mutex> lk(clients_mutex_);
@@ -264,6 +300,17 @@ void WebSocketServer::BroadcastState(std::uint64_t tick, double delta_seconds) {
             client->EnqueueState(state, tick, delta_seconds);
         } catch (const std::exception& ex) {
             std::cerr << "state broadcast failed: " << ex.what() << std::endl;
+        }
+    }
+
+    if (!death_events.empty()) {
+        for (const auto& event : death_events) {
+            if (event.type != CombatEventType::Death) {
+                continue;
+            }
+            for (auto& client : alive) {
+                client->EnqueueDeath(event.target_id, event.tick);
+            }
         }
     }
     last_broadcast_tick_ = tick;
