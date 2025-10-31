@@ -1,7 +1,9 @@
 add_library(arena60_lib
     core/config.cpp
     core/game_loop.cpp
+    game/combat.cpp
     game/game_session.cpp
+    game/projectile.cpp
     network/metrics_http_server.cpp
     network/websocket_server.cpp
     storage/postgres_storage.cpp

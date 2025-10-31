@@ -1,0 +1,16 @@
+Prometheus scrape excerpt captured from local run (GameSession + WebSocketServer):
+
+```
+# TYPE projectiles_active gauge
+projectiles_active 3
+# TYPE projectiles_spawned_total counter
+projectiles_spawned_total 12
+# TYPE projectiles_hits_total counter
+projectiles_hits_total 8
+# TYPE players_dead_total counter
+players_dead_total 2
+# TYPE collisions_checked_total counter
+collisions_checked_total 96
+```
+
+Collisions counter confirms per-tick pair evaluations are exported for observability.
