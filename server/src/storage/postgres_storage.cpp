@@ -1,13 +1,15 @@
 #include "arena60/storage/postgres_storage.h"
 
+#include <chrono>
 #include <iostream>
+#include <sstream>
 
 namespace arena60 {
 
 void PostgresStorage::ConnDeleter::operator()(PGconn* conn) const noexcept {
-  if (conn) {
-    PQfinish(conn);
-  }
+    if (conn) {
+        PQfinish(conn);
+    }
 }
 
 PostgresStorage::PostgresStorage(std::string dsn) : dsn_(std::move(dsn)) {}
@@ -15,17 +17,17 @@ PostgresStorage::PostgresStorage(std::string dsn) : dsn_(std::move(dsn)) {}
 PostgresStorage::~PostgresStorage() { Disconnect(); }
 
 bool PostgresStorage::Connect() {
-  if (connection_) {
+    if (connection_) {
+        return true;
+    }
+    PGconn* raw = PQconnectdb(dsn_.c_str());
+    if (PQstatus(raw) != CONNECTION_OK) {
+        std::cerr << "postgres connection failed: " << PQerrorMessage(raw);
+        PQfinish(raw);
+        return false;
+    }
+    connection_.reset(raw);
     return true;
-  }
-  PGconn* raw = PQconnectdb(dsn_.c_str());
-  if (PQstatus(raw) != CONNECTION_OK) {
-    std::cerr << "postgres connection failed: " << PQerrorMessage(raw);
-    PQfinish(raw);
-    return false;
-  }
-  connection_.reset(raw);
-  return true;
 }
 
 void PostgresStorage::Disconnect() { connection_.reset(); }
@@ -33,25 +35,42 @@ void PostgresStorage::Disconnect() { connection_.reset(); }
 bool PostgresStorage::IsConnected() const noexcept { return connection_ != nullptr; }
 
 bool PostgresStorage::RecordSessionEvent(const std::string& player_id, const std::string& event) {
-  if (!connection_) {
-    std::cerr << "postgres write skipped: no connection" << std::endl;
-    return false;
-  }
-  const char* param_values[2] = {player_id.c_str(), event.c_str()};
-  const int param_lengths[2] = {static_cast<int>(player_id.size()), static_cast<int>(event.size())};
-  const int param_formats[2] = {0, 0};
+    if (!connection_) {
+        std::cerr << "postgres write skipped: no connection" << std::endl;
+        return false;
+    }
+    const auto start = std::chrono::steady_clock::now();
+    const char* param_values[2] = {player_id.c_str(), event.c_str()};
+    const int param_lengths[2] = {static_cast<int>(player_id.size()),
+                                  static_cast<int>(event.size())};
+    const int param_formats[2] = {0, 0};
 
-  PGresult* result = PQexecParams(connection_.get(),
-                                  "INSERT INTO session_events(player_id, event_type, created_at)"
-                                  " VALUES($1, $2, NOW())",
-                                  2, nullptr, param_values, param_lengths, param_formats, 0);
-  if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-    std::cerr << "postgres insert failed: " << PQerrorMessage(connection_.get());
+    PGresult* result = PQexecParams(connection_.get(),
+                                    "INSERT INTO session_events(player_id, event_type, created_at)"
+                                    " VALUES($1, $2, NOW())",
+                                    2, nullptr, param_values, param_lengths, param_formats, 0);
+    const auto finish = std::chrono::steady_clock::now();
+    const double duration = std::chrono::duration<double>(finish - start).count();
+    last_query_seconds_.store(duration, std::memory_order_relaxed);
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+        std::cerr << "postgres insert failed: " << PQerrorMessage(connection_.get());
+        PQclear(result);
+        return false;
+    }
     PQclear(result);
-    return false;
-  }
-  PQclear(result);
-  return true;
+    return true;
+}
+
+std::string PostgresStorage::MetricsSnapshot() const {
+    std::ostringstream oss;
+    oss << "# TYPE database_query_duration_seconds gauge\n";
+    oss << "database_query_duration_seconds " << last_query_seconds_.load(std::memory_order_relaxed)
+        << "\n";
+    return oss.str();
+}
+
+double PostgresStorage::LastQueryDurationSeconds() const noexcept {
+    return last_query_seconds_.load(std::memory_order_relaxed);
 }
 
 }  // namespace arena60

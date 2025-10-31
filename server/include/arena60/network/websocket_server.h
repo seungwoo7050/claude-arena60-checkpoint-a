@@ -1,11 +1,10 @@
 #pragma once
 
+#include <atomic>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-
-#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -19,35 +18,42 @@
 namespace arena60 {
 
 class WebSocketServer : public std::enable_shared_from_this<WebSocketServer> {
- public:
-  WebSocketServer(boost::asio::io_context& io_context, std::uint16_t port,
-                  GameSession& session, GameLoop& loop);
-  ~WebSocketServer();
+   public:
+    WebSocketServer(boost::asio::io_context& io_context, std::uint16_t port, GameSession& session,
+                    GameLoop& loop);
+    ~WebSocketServer();
 
-  void Start();
-  void Stop();
+    void Start();
+    void Stop();
 
-  std::string MetricsSnapshot() const;
-  std::uint16_t Port() const;
+    std::string MetricsSnapshot() const;
+    std::uint16_t Port() const;
 
- private:
-  class ClientSession;
+    void SetLifecycleHandlers(std::function<void(const std::string&)> on_join,
+                              std::function<void(const std::string&)> on_leave);
 
-  void DoAccept();
-  void BroadcastState(std::uint64_t tick, double delta_seconds);
-  void RegisterClient(const std::string& player_id, std::shared_ptr<ClientSession> client);
-  void UnregisterClient(const std::string& player_id);
+   private:
+    class ClientSession;
 
-  boost::asio::io_context& io_context_;
-  boost::asio::ip::tcp::acceptor acceptor_;
-  std::atomic<bool> running_{false};
+    void DoAccept();
+    void BroadcastState(std::uint64_t tick, double delta_seconds);
+    void RegisterClient(const std::string& player_id, std::shared_ptr<ClientSession> client);
+    void UnregisterClient(const std::string& player_id);
 
-  GameSession& session_;
-  GameLoop& loop_;
+    boost::asio::io_context& io_context_;
+    boost::asio::ip::tcp::acceptor acceptor_;
+    std::atomic<bool> running_{false};
 
-  mutable std::mutex clients_mutex_;
-  std::unordered_map<std::string, std::weak_ptr<ClientSession>> clients_;
-  std::uint64_t last_broadcast_tick_{0};
+    GameSession& session_;
+    GameLoop& loop_;
+
+    std::function<void(const std::string&)> on_join_;
+    std::function<void(const std::string&)> on_leave_;
+
+    mutable std::mutex clients_mutex_;
+    std::unordered_map<std::string, std::weak_ptr<ClientSession>> clients_;
+    std::uint64_t last_broadcast_tick_{0};
+    std::atomic<std::uint32_t> connection_count_{0};
 };
 
 }  // namespace arena60

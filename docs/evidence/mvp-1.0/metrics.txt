@@ -1,4 +1,8 @@
 # TYPE game_tick_rate gauge
-game_tick_rate 59.9084
+game_tick_rate 61.593
 # TYPE game_tick_duration_seconds gauge
-game_tick_duration_seconds 0.0166922
+game_tick_duration_seconds 0.0162356
+# TYPE websocket_connections_total gauge
+websocket_connections_total 0
+# TYPE database_query_duration_seconds gauge
+database_query_duration_seconds 0

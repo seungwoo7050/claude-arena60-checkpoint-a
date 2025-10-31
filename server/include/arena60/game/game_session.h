@@ -12,23 +12,22 @@
 namespace arena60 {
 
 class GameSession {
- public:
-  explicit GameSession(double tick_rate);
+   public:
+    explicit GameSession(double tick_rate);
 
-  void UpsertPlayer(const std::string& player_id);
-  void RemovePlayer(const std::string& player_id);
+    void UpsertPlayer(const std::string& player_id);
+    void RemovePlayer(const std::string& player_id);
 
-  void ApplyInput(const std::string& player_id, const MovementInput& input,
-                  double delta_seconds);
+    void ApplyInput(const std::string& player_id, const MovementInput& input, double delta_seconds);
 
-  PlayerState GetPlayer(const std::string& player_id) const;
-  std::vector<PlayerState> Snapshot() const;
+    PlayerState GetPlayer(const std::string& player_id) const;
+    std::vector<PlayerState> Snapshot() const;
 
- private:
-  double speed_per_second_;
+   private:
+    double speed_per_second_;
 
-  mutable std::mutex mutex_;
-  std::unordered_map<std::string, PlayerState> players_;
+    mutable std::mutex mutex_;
+    std::unordered_map<std::string, PlayerState> players_;
 };
 
 }  // namespace arena60
