@@ -1,6 +1,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <boost/beast/http.hpp>
 #include <csignal>
 #include <chrono>
 #include <functional>
@@ -14,7 +15,10 @@
 #include "arena60/matchmaking/matchmaker.h"
 #include "arena60/matchmaking/match_queue.h"
 #include "arena60/network/metrics_http_server.h"
+#include "arena60/network/profile_http_router.h"
 #include "arena60/network/websocket_server.h"
+#include "arena60/stats/leaderboard_store.h"
+#include "arena60/stats/player_profile_service.h"
 #include "arena60/storage/postgres_storage.h"
 
 int main() {
@@ -34,6 +38,8 @@ int main() {
     boost::asio::io_context io_context;
     auto match_queue = std::make_shared<InMemoryMatchQueue>();
     auto matchmaker = std::make_shared<Matchmaker>(match_queue);
+    auto leaderboard = std::make_shared<InMemoryLeaderboardStore>();
+    auto profile_service = std::make_shared<PlayerProfileService>(leaderboard);
     auto server = std::make_shared<WebSocketServer>(io_context, config.port(), session, loop);
     server->SetLifecycleHandlers(
         [&, matchmaker](const std::string& player_id) {
@@ -49,17 +55,25 @@ int main() {
                 std::cerr << "Failed to record session end for " << player_id << std::endl;
             }
         });
+    server->SetMatchCompletedCallback(
+        [profile_service](const MatchResult& result) { profile_service->RecordMatch(result); });
 
-    auto metrics_provider = [&, server]() {
+    auto metrics_provider = [&, server, profile_service]() {
         std::ostringstream oss;
         oss << loop.PrometheusSnapshot();
         oss << server->MetricsSnapshot();
         oss << storage.MetricsSnapshot();
         oss << matchmaker->MetricsSnapshot();
+        oss << profile_service->MetricsSnapshot();
         return oss.str();
     };
+    auto router = std::make_shared<ProfileHttpRouter>(metrics_provider, profile_service);
+    MetricsHttpServer::RequestHandler http_handler =
+        [router](const boost::beast::http::request<boost::beast::http::string_body>& request) {
+            return router->Handle(request);
+        };
     auto metrics_server =
-        std::make_shared<MetricsHttpServer>(io_context, config.metrics_port(), metrics_provider);
+        std::make_shared<MetricsHttpServer>(io_context, config.metrics_port(), std::move(http_handler));
 
     auto matchmaking_timer = std::make_shared<boost::asio::steady_timer>(io_context);
     std::function<void(const boost::system::error_code&)> matchmaking_tick;

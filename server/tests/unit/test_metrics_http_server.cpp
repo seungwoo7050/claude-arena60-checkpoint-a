@@ -43,8 +43,26 @@ TEST(MetricsHttpServerTest, ServesMetricsPayload) {
     std::promise<void> ready;
     std::shared_ptr<arena60::MetricsHttpServer> server;
     std::thread server_thread([&]() {
-        server = std::make_shared<arena60::MetricsHttpServer>(
-            io_context, 0, []() { return std::string{"metric 1\n"}; });
+        arena60::MetricsHttpServer::RequestHandler handler =
+            [](const boost::beast::http::request<boost::beast::http::string_body>& req) {
+                namespace http = boost::beast::http;
+                http::response<http::string_body> res;
+                res.version(req.version());
+                res.keep_alive(false);
+                if (req.method() == http::verb::get && req.target() == "/metrics") {
+                    res.result(http::status::ok);
+                    res.set(http::field::content_type, "text/plain; version=0.0.4");
+                    res.body() = "metric 1\n";
+                } else {
+                    res.result(http::status::not_found);
+                    res.set(http::field::content_type, "text/plain");
+                    res.body() = "Not Found";
+                }
+                res.prepare_payload();
+                return res;
+            };
+        server =
+            std::make_shared<arena60::MetricsHttpServer>(io_context, 0, std::move(handler));
         server->Start();
         ready.set_value();
         io_context.run();

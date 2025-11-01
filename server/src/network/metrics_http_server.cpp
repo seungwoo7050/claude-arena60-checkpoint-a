@@ -36,22 +36,17 @@ class MetricsHttpServer::Session : public std::enable_shared_from_this<MetricsHt
     }
 
     void HandleRequest() {
-        response_ = {};
-        response_.version(request_.version());
-        response_.keep_alive(false);
-
-        if (request_.method() == http::verb::get && request_.target() == "/metrics") {
-            response_.result(http::status::ok);
-            response_.set(http::field::content_type, "text/plain; version=0.0.4");
-            if (server_->snapshot_provider_) {
-                response_.body() = server_->snapshot_provider_();
-            }
+        if (server_->handler_) {
+            response_ = server_->handler_(request_);
         } else {
+            response_ = {};
+            response_.version(request_.version());
+            response_.keep_alive(false);
             response_.result(http::status::not_found);
             response_.set(http::field::content_type, "text/plain");
             response_.body() = "Not Found";
+            response_.prepare_payload();
         }
-        response_.prepare_payload();
 
         auto self = shared_from_this();
         http::async_write(socket_, response_,
@@ -78,10 +73,10 @@ class MetricsHttpServer::Session : public std::enable_shared_from_this<MetricsHt
 };
 
 MetricsHttpServer::MetricsHttpServer(boost::asio::io_context& io_context, std::uint16_t port,
-                                     std::function<std::string()> snapshot_provider)
+                                     RequestHandler handler)
     : io_context_(io_context),
       acceptor_(io_context),
-      snapshot_provider_(std::move(snapshot_provider)) {
+      handler_(std::move(handler)) {
     boost::system::error_code ec;
     tcp::endpoint endpoint(tcp::v4(), port);
     acceptor_.open(endpoint.protocol(), ec);

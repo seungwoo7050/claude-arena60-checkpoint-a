@@ -14,6 +14,7 @@
 
 #include "arena60/core/game_loop.h"
 #include "arena60/game/game_session.h"
+#include "arena60/stats/match_stats.h"
 
 namespace arena60 {
 
@@ -31,6 +32,7 @@ class WebSocketServer : public std::enable_shared_from_this<WebSocketServer> {
 
     void SetLifecycleHandlers(std::function<void(const std::string&)> on_join,
                               std::function<void(const std::string&)> on_leave);
+    void SetMatchCompletedCallback(std::function<void(const MatchResult&)> callback);
 
    private:
     class ClientSession;
@@ -49,11 +51,14 @@ class WebSocketServer : public std::enable_shared_from_this<WebSocketServer> {
 
     std::function<void(const std::string&)> on_join_;
     std::function<void(const std::string&)> on_leave_;
+    std::function<void(const MatchResult&)> match_completed_callback_;
 
     mutable std::mutex clients_mutex_;
     std::unordered_map<std::string, std::weak_ptr<ClientSession>> clients_;
     std::uint64_t last_broadcast_tick_{0};
     std::atomic<std::uint32_t> connection_count_{0};
+
+    MatchStatsCollector match_stats_collector_;
 };
 
 }  // namespace arena60

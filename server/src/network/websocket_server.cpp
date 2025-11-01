@@ -2,10 +2,12 @@
 
 #include <atomic>
 #include <boost/asio/post.hpp>
+#include <chrono>
 #include <iostream>
 #include <limits>
 #include <queue>
 #include <sstream>
+#include <utility>
 
 namespace arena60 {
 
@@ -280,6 +282,8 @@ void WebSocketServer::DoAccept() {
 void WebSocketServer::BroadcastState(std::uint64_t tick, double delta_seconds) {
     session_.Tick(tick, delta_seconds);
     auto death_events = session_.ConsumeDeathEvents();
+    std::vector<MatchResult> completed_matches;
+    const bool has_callback = static_cast<bool>(match_completed_callback_);
 
     std::vector<std::shared_ptr<ClientSession>> alive;
     {
@@ -311,9 +315,19 @@ void WebSocketServer::BroadcastState(std::uint64_t tick, double delta_seconds) {
             for (auto& client : alive) {
                 client->EnqueueDeath(event.target_id, event.tick);
             }
+            if (has_callback) {
+                completed_matches.push_back(
+                    match_stats_collector_.Collect(event, session_, std::chrono::system_clock::now()));
+            }
         }
     }
     last_broadcast_tick_ = tick;
+
+    if (has_callback) {
+        for (const auto& match : completed_matches) {
+            match_completed_callback_(match);
+        }
+    }
 }
 
 void WebSocketServer::RegisterClient(const std::string& player_id,
@@ -362,6 +376,11 @@ void WebSocketServer::SetLifecycleHandlers(std::function<void(const std::string&
                                            std::function<void(const std::string&)> on_leave) {
     on_join_ = std::move(on_join);
     on_leave_ = std::move(on_leave);
+}
+
+void WebSocketServer::SetMatchCompletedCallback(
+    std::function<void(const MatchResult&)> callback) {
+    match_completed_callback_ = std::move(callback);
 }
 
 }  // namespace arena60

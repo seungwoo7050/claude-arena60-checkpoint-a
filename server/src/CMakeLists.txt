@@ -10,8 +10,12 @@ add_library(arena60_lib
     matchmaking/matchmaker.cpp
     matchmaking/match_notification_channel.cpp
     network/metrics_http_server.cpp
+    network/profile_http_router.cpp
     network/websocket_server.cpp
     storage/postgres_storage.cpp
+    stats/leaderboard_store.cpp
+    stats/match_stats.cpp
+    stats/player_profile_service.cpp
 )
 
 target_link_libraries(arena60_lib

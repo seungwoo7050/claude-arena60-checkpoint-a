@@ -1,0 +1,8 @@
+# TYPE player_profiles_total gauge
+player_profiles_total 2
+# TYPE leaderboard_entries_total gauge
+leaderboard_entries_total 2
+# TYPE matches_recorded_total counter
+matches_recorded_total 3
+# TYPE rating_updates_total counter
+rating_updates_total 6
