@@ -171,18 +171,14 @@ jobs:
         cd "${{ github.workspace }}/server"
         "${VCPKG_ROOT}/vcpkg" install --triplet ${VCPKG_DEFAULT_TRIPLET}
 
-    - name: Install dependencies
+    - name: Install clang-format
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-format clang-tidy
-    
-    - name: clang-format check
-      run: |
-        git ls-files "**/*.[ch]pp" "**/*.h" "**/*.c" "**/*.cc" "**/*.cpp" \
-          | xargs -r clang-format -i
-        if ! git diff --exit-code; then
-          echo "::error::Code not formatted. Run clang-format."; exit 1
-        fi
+        sudo apt-get install -y clang-format-15 clang-tidy
+        sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-15 100
+
+    - name: Check formatting
+      run: bash scripts/check-format.sh
 
     - name: Run clang-tidy
       run: |

@@ -7,8 +7,7 @@ namespace arena60 {
 
 class MatchRequest {
    public:
-    MatchRequest(std::string player_id, int elo,
-                 std::chrono::steady_clock::time_point enqueued_at,
+    MatchRequest(std::string player_id, int elo, std::chrono::steady_clock::time_point enqueued_at,
                  std::string preferred_region = "global");
 
     const std::string& player_id() const noexcept { return player_id_; }

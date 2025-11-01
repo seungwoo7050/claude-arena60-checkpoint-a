@@ -36,4 +36,3 @@ class ProfileHttpRouter {
 };
 
 }  // namespace arena60
-

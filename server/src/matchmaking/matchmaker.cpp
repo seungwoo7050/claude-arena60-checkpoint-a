@@ -87,8 +87,8 @@ std::vector<Match> Matchmaker::RunMatching(std::chrono::steady_clock::time_point
             const int average_elo = (request.elo() + partner.elo()) / 2;
             std::ostringstream id_stream;
             id_stream << "match-" << ++match_counter_;
-            Match match(id_stream.str(), {request.player_id(), partner.player_id()}, average_elo, now,
-                        ResolveRegion(request, partner));
+            Match match(id_stream.str(), {request.player_id(), partner.player_id()}, average_elo,
+                        now, ResolveRegion(request, partner));
             matches.push_back(match);
 
             ObserveWaitLocked(request.WaitSeconds(now));

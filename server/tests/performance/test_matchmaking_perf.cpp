@@ -11,7 +11,7 @@ using namespace std::chrono;
 using arena60::InMemoryMatchQueue;
 using arena60::Matchmaker;
 using arena60::MatchRequest;
-}
+}  // namespace
 
 TEST(MatchmakingPerformanceTest, MatchesTwoHundredPlayersUnderTwoMilliseconds) {
     auto queue = std::make_shared<InMemoryMatchQueue>();
@@ -20,8 +20,7 @@ TEST(MatchmakingPerformanceTest, MatchesTwoHundredPlayersUnderTwoMilliseconds) {
 
     for (int i = 0; i < 200; ++i) {
         const int elo = 1000 + (i % 40) * 5;
-        matchmaker.Enqueue(MatchRequest{"perf" + std::to_string(i), elo,
-                                        base + milliseconds(i)});
+        matchmaker.Enqueue(MatchRequest{"perf" + std::to_string(i), elo, base + milliseconds(i)});
     }
 
     const auto start = steady_clock::now();

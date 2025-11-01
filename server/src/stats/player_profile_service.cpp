@@ -8,11 +8,15 @@
 namespace arena60 {
 
 EloRatingUpdate EloRatingCalculator::Update(int winner_rating, int loser_rating) const {
-    const double expected_winner = 1.0 / (1.0 + std::pow(10.0, (loser_rating - winner_rating) / 400.0));
-    const double expected_loser = 1.0 / (1.0 + std::pow(10.0, (winner_rating - loser_rating) / 400.0));
+    const double expected_winner =
+        1.0 / (1.0 + std::pow(10.0, (loser_rating - winner_rating) / 400.0));
+    const double expected_loser =
+        1.0 / (1.0 + std::pow(10.0, (winner_rating - loser_rating) / 400.0));
     constexpr double kFactor = 25.0;
-    const int winner_new = static_cast<int>(std::lround(winner_rating + kFactor * (1.0 - expected_winner)));
-    const int loser_new = static_cast<int>(std::lround(loser_rating + kFactor * (0.0 - expected_loser)));
+    const int winner_new =
+        static_cast<int>(std::lround(winner_rating + kFactor * (1.0 - expected_winner)));
+    const int loser_new =
+        static_cast<int>(std::lround(loser_rating + kFactor * (0.0 - expected_loser)));
     return {winner_new, loser_new};
 }
 
@@ -75,12 +79,13 @@ std::vector<PlayerProfile> PlayerProfileService::TopProfiles(std::size_t limit) 
         for (const auto& kv : aggregates_) {
             profiles.push_back(BuildProfileUnsafe(kv.first, kv.second));
         }
-        std::sort(profiles.begin(), profiles.end(), [](const PlayerProfile& lhs, const PlayerProfile& rhs) {
-            if (lhs.rating != rhs.rating) {
-                return lhs.rating > rhs.rating;
-            }
-            return lhs.player_id < rhs.player_id;
-        });
+        std::sort(profiles.begin(), profiles.end(),
+                  [](const PlayerProfile& lhs, const PlayerProfile& rhs) {
+                      if (lhs.rating != rhs.rating) {
+                          return lhs.rating > rhs.rating;
+                      }
+                      return lhs.player_id < rhs.player_id;
+                  });
         if (profiles.size() > limit) {
             profiles.resize(limit);
         }
@@ -117,7 +122,8 @@ std::string PlayerProfileService::SerializeProfile(const PlayerProfile& profile)
     return oss.str();
 }
 
-std::string PlayerProfileService::SerializeLeaderboard(const std::vector<PlayerProfile>& profiles) const {
+std::string PlayerProfileService::SerializeLeaderboard(
+    const std::vector<PlayerProfile>& profiles) const {
     std::ostringstream oss;
     oss << "[";
     for (std::size_t i = 0; i < profiles.size(); ++i) {
@@ -163,4 +169,3 @@ PlayerProfile PlayerProfileService::BuildProfileUnsafe(const std::string& player
 }
 
 }  // namespace arena60
-

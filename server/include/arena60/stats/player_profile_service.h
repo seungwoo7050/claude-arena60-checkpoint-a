@@ -68,7 +68,8 @@ class PlayerProfileService {
         int rating{1200};
     };
 
-    PlayerProfile BuildProfileUnsafe(const std::string& player_id, const AggregateStats& stats) const;
+    PlayerProfile BuildProfileUnsafe(const std::string& player_id,
+                                     const AggregateStats& stats) const;
 
     std::shared_ptr<LeaderboardStore> leaderboard_;
     EloRatingCalculator calculator_;
@@ -80,4 +81,3 @@ class PlayerProfileService {
 };
 
 }  // namespace arena60
-

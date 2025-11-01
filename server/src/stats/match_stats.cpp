@@ -115,9 +115,10 @@ MatchResult MatchStatsCollector::Collect(const CombatEvent& death_event, const G
         stats.emplace_back(match_id, entry.player_id, entry.shots_fired, entry.hits_landed,
                            entry.kills, entry.deaths, entry.damage_dealt, entry.damage_taken);
     }
-    std::sort(stats.begin(), stats.end(), [](const PlayerMatchStats& lhs, const PlayerMatchStats& rhs) {
-        return lhs.player_id() < rhs.player_id();
-    });
+    std::sort(stats.begin(), stats.end(),
+              [](const PlayerMatchStats& lhs, const PlayerMatchStats& rhs) {
+                  return lhs.player_id() < rhs.player_id();
+              });
 
     std::cout << "match complete " << match_id << " winner=" << death_event.shooter_id
               << " loser=" << death_event.target_id << std::endl;
@@ -127,4 +128,3 @@ MatchResult MatchStatsCollector::Collect(const CombatEvent& death_event, const G
 }
 
 }  // namespace arena60
-

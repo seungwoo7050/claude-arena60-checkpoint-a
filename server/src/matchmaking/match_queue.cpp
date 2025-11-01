@@ -61,13 +61,12 @@ std::vector<QueuedPlayer> InMemoryMatchQueue::FetchOrdered() const {
             ordered.push_back(QueuedPlayer{entry.request, entry.order});
         }
     }
-    std::sort(ordered.begin(), ordered.end(),
-              [](const QueuedPlayer& lhs, const QueuedPlayer& rhs) {
-                  if (lhs.request.elo() == rhs.request.elo()) {
-                      return lhs.order < rhs.order;
-                  }
-                  return lhs.request.elo() < rhs.request.elo();
-              });
+    std::sort(ordered.begin(), ordered.end(), [](const QueuedPlayer& lhs, const QueuedPlayer& rhs) {
+        if (lhs.request.elo() == rhs.request.elo()) {
+            return lhs.order < rhs.order;
+        }
+        return lhs.request.elo() < rhs.request.elo();
+    });
     return ordered;
 }
 
@@ -93,7 +92,7 @@ RedisMatchQueue::RedisMatchQueue(std::ostream& stream) : stream_(&stream) {}
 void RedisMatchQueue::Upsert(const MatchRequest& request, std::uint64_t order) {
     if (stream_) {
         (*stream_) << "ZADD matchmaking_queue " << request.elo() << ' ' << request.player_id()
-                    << std::endl;
+                   << std::endl;
     }
     fallback_.Upsert(request, order);
 }

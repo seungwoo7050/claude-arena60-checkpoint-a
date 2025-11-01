@@ -20,11 +20,12 @@ TEST(PlayerProfileServicePerformanceTest, RecordsHundredMatchesUnderBudget) {
             arena60::PlayerMatchStats{match_id, "winner", 5, 5, 1, 0, 100, 10},
             arena60::PlayerMatchStats{match_id, "loser", 4, 2, 0, 1, 40, 100},
         };
-        arena60::MatchResult result{match_id, "winner", "loser", now + std::chrono::seconds(i), stats};
+        arena60::MatchResult result{match_id, "winner", "loser", now + std::chrono::seconds(i),
+                                    stats};
         service.RecordMatch(result);
     }
     const auto finish = std::chrono::steady_clock::now();
-    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
+    const auto elapsed_ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
     EXPECT_LE(elapsed_ms, 5);
 }
-

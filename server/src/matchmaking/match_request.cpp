@@ -8,7 +8,7 @@ namespace {
 constexpr int kBaseTolerance = 100;
 constexpr int kToleranceStep = 25;
 constexpr double kStepSeconds = 5.0;
-}
+}  // namespace
 
 MatchRequest::MatchRequest(std::string player_id, int elo,
                            std::chrono::steady_clock::time_point enqueued_at,

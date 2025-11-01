@@ -11,8 +11,9 @@ namespace arena60 {
 
 class MetricsHttpServer : public std::enable_shared_from_this<MetricsHttpServer> {
    public:
-    using RequestHandler = std::function<boost::beast::http::response<boost::beast::http::string_body>(
-        const boost::beast::http::request<boost::beast::http::string_body>&)>;
+    using RequestHandler =
+        std::function<boost::beast::http::response<boost::beast::http::string_body>(
+            const boost::beast::http::request<boost::beast::http::string_body>&)>;
 
     MetricsHttpServer(boost::asio::io_context& io_context, std::uint16_t port,
                       RequestHandler handler);

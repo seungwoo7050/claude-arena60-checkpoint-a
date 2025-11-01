@@ -13,7 +13,7 @@ using arena60::InMemoryMatchQueue;
 using arena60::Match;
 using arena60::Matchmaker;
 using arena60::MatchRequest;
-}
+}  // namespace
 
 TEST(MatchmakerTest, DoesNotMatchOutsideTolerance) {
     auto queue = std::make_shared<InMemoryMatchQueue>();

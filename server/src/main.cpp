@@ -2,8 +2,8 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/beast/http.hpp>
-#include <csignal>
 #include <chrono>
+#include <csignal>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -12,8 +12,8 @@
 #include "arena60/core/config.h"
 #include "arena60/core/game_loop.h"
 #include "arena60/game/game_session.h"
-#include "arena60/matchmaking/matchmaker.h"
 #include "arena60/matchmaking/match_queue.h"
+#include "arena60/matchmaking/matchmaker.h"
 #include "arena60/network/metrics_http_server.h"
 #include "arena60/network/profile_http_router.h"
 #include "arena60/network/websocket_server.h"
@@ -43,8 +43,7 @@ int main() {
     auto server = std::make_shared<WebSocketServer>(io_context, config.port(), session, loop);
     server->SetLifecycleHandlers(
         [&, matchmaker](const std::string& player_id) {
-            matchmaker->Enqueue(
-                MatchRequest{player_id, 1200, std::chrono::steady_clock::now()});
+            matchmaker->Enqueue(MatchRequest{player_id, 1200, std::chrono::steady_clock::now()});
             if (!storage.RecordSessionEvent(player_id, "start")) {
                 std::cerr << "Failed to record session start for " << player_id << std::endl;
             }
@@ -72,13 +71,13 @@ int main() {
         [router](const boost::beast::http::request<boost::beast::http::string_body>& request) {
             return router->Handle(request);
         };
-    auto metrics_server =
-        std::make_shared<MetricsHttpServer>(io_context, config.metrics_port(), std::move(http_handler));
+    auto metrics_server = std::make_shared<MetricsHttpServer>(io_context, config.metrics_port(),
+                                                              std::move(http_handler));
 
     auto matchmaking_timer = std::make_shared<boost::asio::steady_timer>(io_context);
     std::function<void(const boost::system::error_code&)> matchmaking_tick;
-    matchmaking_tick = [matchmaking_timer, matchmaker, &matchmaking_tick](
-                            const boost::system::error_code& ec) {
+    matchmaking_tick = [matchmaking_timer, matchmaker,
+                        &matchmaking_tick](const boost::system::error_code& ec) {
         if (ec == boost::asio::error::operation_aborted) {
             return;
         }

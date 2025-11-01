@@ -74,9 +74,7 @@ class MetricsHttpServer::Session : public std::enable_shared_from_this<MetricsHt
 
 MetricsHttpServer::MetricsHttpServer(boost::asio::io_context& io_context, std::uint16_t port,
                                      RequestHandler handler)
-    : io_context_(io_context),
-      acceptor_(io_context),
-      handler_(std::move(handler)) {
+    : io_context_(io_context), acceptor_(io_context), handler_(std::move(handler)) {
     boost::system::error_code ec;
     tcp::endpoint endpoint(tcp::v4(), port);
     acceptor_.open(endpoint.protocol(), ec);

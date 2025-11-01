@@ -316,8 +316,8 @@ void WebSocketServer::BroadcastState(std::uint64_t tick, double delta_seconds) {
                 client->EnqueueDeath(event.target_id, event.tick);
             }
             if (has_callback) {
-                completed_matches.push_back(
-                    match_stats_collector_.Collect(event, session_, std::chrono::system_clock::now()));
+                completed_matches.push_back(match_stats_collector_.Collect(
+                    event, session_, std::chrono::system_clock::now()));
             }
         }
     }
@@ -378,8 +378,7 @@ void WebSocketServer::SetLifecycleHandlers(std::function<void(const std::string&
     on_leave_ = std::move(on_leave);
 }
 
-void WebSocketServer::SetMatchCompletedCallback(
-    std::function<void(const MatchResult&)> callback) {
+void WebSocketServer::SetMatchCompletedCallback(std::function<void(const MatchResult&)> callback) {
     match_completed_callback_ = std::move(callback);
 }
 

@@ -61,8 +61,7 @@ TEST(MetricsHttpServerTest, ServesMetricsPayload) {
                 res.prepare_payload();
                 return res;
             };
-        server =
-            std::make_shared<arena60::MetricsHttpServer>(io_context, 0, std::move(handler));
+        server = std::make_shared<arena60::MetricsHttpServer>(io_context, 0, std::move(handler));
         server->Start();
         ready.set_value();
         io_context.run();

@@ -9,7 +9,7 @@ using namespace std::chrono;
 using arena60::InMemoryMatchQueue;
 using arena60::MatchQueue;
 using arena60::MatchRequest;
-}
+}  // namespace
 
 TEST(MatchQueueTest, OrdersByEloAndInsertion) {
     InMemoryMatchQueue queue;

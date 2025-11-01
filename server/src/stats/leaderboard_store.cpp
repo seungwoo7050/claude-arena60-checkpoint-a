@@ -75,8 +75,8 @@ void RedisLeaderboardStore::Erase(const std::string& player_id) {
 }
 
 std::vector<std::pair<std::string, int>> RedisLeaderboardStore::TopN(std::size_t limit) const {
-    std::cout << "redis zrevrange leaderboard 0 " << (limit ? limit - 1 : 0)
-              << " withscores" << std::endl;
+    std::cout << "redis zrevrange leaderboard 0 " << (limit ? limit - 1 : 0) << " withscores"
+              << std::endl;
     return {};
 }
 
@@ -88,4 +88,3 @@ std::optional<int> RedisLeaderboardStore::Get(const std::string& player_id) cons
 std::size_t RedisLeaderboardStore::Size() const { return 0; }
 
 }  // namespace arena60
-

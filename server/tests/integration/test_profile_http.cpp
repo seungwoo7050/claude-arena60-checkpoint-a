@@ -20,7 +20,7 @@ namespace http = boost::beast::http;
 namespace {
 using arena60::MatchResult;
 using arena60::PlayerMatchStats;
-}
+}  // namespace
 
 http::response<http::string_body> PerformRequest(std::uint16_t port, const std::string& target) {
     boost::asio::io_context io_context;
@@ -58,7 +58,9 @@ TEST(ProfileHttpRouterIntegrationTest, ServesMetricsProfilesAndLeaderboard) {
     auto metrics_provider = [profile_service]() { return profile_service->MetricsSnapshot(); };
     auto router = std::make_shared<arena60::ProfileHttpRouter>(metrics_provider, profile_service);
     arena60::MetricsHttpServer::RequestHandler handler =
-        [router](const http::request<http::string_body>& request) { return router->Handle(request); };
+        [router](const http::request<http::string_body>& request) {
+            return router->Handle(request);
+        };
     auto server = std::make_shared<arena60::MetricsHttpServer>(io_context, 0, handler);
     server->Start();
 
@@ -91,4 +93,3 @@ TEST(ProfileHttpRouterIntegrationTest, ServesMetricsProfilesAndLeaderboard) {
         server_thread.join();
     }
 }
-

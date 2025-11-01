@@ -11,7 +11,7 @@
 namespace {
 using arena60::MatchResult;
 using arena60::PlayerMatchStats;
-}
+}  // namespace
 
 TEST(PlayerProfileServiceTest, UpdatesRatingsAggregatesStatsAndSerializes) {
     auto leaderboard = std::make_shared<arena60::InMemoryLeaderboardStore>();
@@ -55,14 +55,16 @@ TEST(PlayerProfileServiceTest, UpdatesRatingsAggregatesStatsAndSerializes) {
         PlayerMatchStats{"match-2", "defender", 6, 6, 1, 0, 120, 0},
         PlayerMatchStats{"match-2", "attacker", 3, 1, 0, 1, 20, 120},
     };
-    MatchResult match2{"match-2", "defender", "attacker", now + std::chrono::seconds(1), match2_stats};
+    MatchResult match2{"match-2", "defender", "attacker", now + std::chrono::seconds(1),
+                       match2_stats};
     service.RecordMatch(match2);
 
     std::vector<PlayerMatchStats> match3_stats{
         PlayerMatchStats{"match-3", "defender", 6, 6, 1, 0, 120, 0},
         PlayerMatchStats{"match-3", "attacker", 3, 1, 0, 1, 20, 120},
     };
-    MatchResult match3{"match-3", "defender", "attacker", now + std::chrono::seconds(2), match3_stats};
+    MatchResult match3{"match-3", "defender", "attacker", now + std::chrono::seconds(2),
+                       match3_stats};
     service.RecordMatch(match3);
 
     auto updated_attacker = service.GetProfile("attacker");
@@ -98,4 +100,3 @@ TEST(PlayerProfileServiceTest, UpdatesRatingsAggregatesStatsAndSerializes) {
     EXPECT_NE(metrics_after.find("matches_recorded_total 3"), std::string::npos);
     EXPECT_NE(metrics_after.find("rating_updates_total 6"), std::string::npos);
 }
-

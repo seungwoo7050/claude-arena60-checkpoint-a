@@ -11,7 +11,7 @@ namespace {
 using arena60::MatchResult;
 using arena60::MatchStatsCollector;
 using arena60::PlayerMatchStats;
-}
+}  // namespace
 
 TEST(MatchStatsCollectorTest, ProducesAccurateStatsFromCombatLog) {
     arena60::GameSession session(60.0);
@@ -56,9 +56,9 @@ TEST(MatchStatsCollectorTest, ProducesAccurateStatsFromCombatLog) {
     ASSERT_EQ(2u, stats.size());
 
     auto find_stats = [&](const std::string& id) -> const PlayerMatchStats& {
-        const auto it = std::find_if(stats.begin(), stats.end(), [&](const PlayerMatchStats& entry) {
-            return entry.player_id() == id;
-        });
+        const auto it =
+            std::find_if(stats.begin(), stats.end(),
+                         [&](const PlayerMatchStats& entry) { return entry.player_id() == id; });
         if (it == stats.end()) {
             throw std::runtime_error("player stats not found");
         }
@@ -80,4 +80,3 @@ TEST(MatchStatsCollectorTest, ProducesAccurateStatsFromCombatLog) {
     EXPECT_EQ(defender_stats.shots_fired(), 0u);
     EXPECT_DOUBLE_EQ(0.0, defender_stats.Accuracy());
 }
-

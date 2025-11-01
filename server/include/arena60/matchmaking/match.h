@@ -8,9 +8,8 @@ namespace arena60 {
 
 class Match {
    public:
-    Match(std::string match_id, std::vector<std::string> players,
-          int average_elo, std::chrono::steady_clock::time_point created_at,
-          std::string region);
+    Match(std::string match_id, std::vector<std::string> players, int average_elo,
+          std::chrono::steady_clock::time_point created_at, std::string region);
 
     const std::string& match_id() const noexcept { return match_id_; }
     const std::vector<std::string>& players() const noexcept { return players_; }

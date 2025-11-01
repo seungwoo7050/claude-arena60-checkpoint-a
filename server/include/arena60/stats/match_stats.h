@@ -47,9 +47,7 @@ class MatchResult {
     const std::string& match_id() const noexcept { return match_id_; }
     const std::string& winner_id() const noexcept { return winner_id_; }
     const std::string& loser_id() const noexcept { return loser_id_; }
-    std::chrono::system_clock::time_point completed_at() const noexcept {
-        return completed_at_;
-    }
+    std::chrono::system_clock::time_point completed_at() const noexcept { return completed_at_; }
     const std::vector<PlayerMatchStats>& player_stats() const noexcept { return player_stats_; }
 
    private:
@@ -67,4 +65,3 @@ class MatchStatsCollector {
 };
 
 }  // namespace arena60
-

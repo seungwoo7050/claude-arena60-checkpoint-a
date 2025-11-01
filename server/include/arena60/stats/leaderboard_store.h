@@ -49,4 +49,3 @@ class RedisLeaderboardStore : public LeaderboardStore {
 };
 
 }  // namespace arena60
-

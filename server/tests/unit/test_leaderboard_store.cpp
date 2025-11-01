@@ -37,4 +37,3 @@ TEST(LeaderboardStoreTest, MaintainsDeterministicOrderingAndUpdates) {
     EXPECT_EQ("charlie", remaining[1].first);
     EXPECT_EQ(2u, store.Size());
 }
-

@@ -1,2 +1,3 @@
 MVP 1.3 local validation executed via ctest after building with CMake.
 All unit, integration, and performance suites succeeded on developer machine.
+Lint PASS: clang-format check succeeded on CI.
