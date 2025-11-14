@@ -87,8 +87,11 @@ class Arena60Client:
             mouse_x = max(0, min(500, mouse_x))
             mouse_y = max(0, min(500, mouse_y))
 
-            # Send input
-            input_msg = f"input {self.player_id} {self.seq} {up} {down} {left} {right} {mouse_x:.1f} {mouse_y:.1f}"
+            # Fire input (30% probability - MVP 1.1 combat)
+            fire = 1 if random.random() < 0.3 else 0
+
+            # Send input (MVP 1.1 protocol with fire field)
+            input_msg = f"input {self.player_id} {self.seq} {up} {down} {left} {right} {mouse_x:.1f} {mouse_y:.1f} {fire}"
             await websocket.send(input_msg)
             print(f"[{self.player_id}] -> {input_msg}")
 

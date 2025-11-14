@@ -91,13 +91,13 @@ Production-quality game server for Korean game industry portfolio. Built with C+
 
 ## Performance Benchmarks
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Tick rate variance | ≤ 1.0 ms | **0.04 ms** | ✅ |
-| WebSocket latency (p99) | ≤ 20 ms | **18.3 ms** | ✅ |
-| Combat tick duration (avg) | < 0.5 ms | **0.31 ms** | ✅ |
-| Matchmaking (200 players) | ≤ 2 ms | **≤ 2 ms** | ✅ |
-| Profile service (100 matches) | ≤ 5 ms | **< 1 ms** | ✅ |
+| Metric | Target | Actual | Status | Evidence |
+|--------|--------|--------|--------|----------|
+| Tick rate variance | ≤ 1.0 ms | **0.04 ms** | ✅ | [1.0](./docs/evidence/mvp-1.0/performance-report.md) |
+| WebSocket latency (p99) | ≤ 20 ms | **18.3 ms** | ✅ | [1.0](./docs/evidence/mvp-1.0/performance-report.md) |
+| Combat tick duration (avg) | < 0.5 ms | **0.31 ms** | ✅ | [1.1](./docs/evidence/mvp-1.1/performance-report.md) |
+| Matchmaking (200 players) | ≤ 2 ms | **≤ 2 ms** | ✅ | [1.2](./docs/evidence/mvp-1.2/performance-report.md) |
+| Profile service (100 matches) | ≤ 5 ms | **< 1 ms** | ✅ | [1.3](./docs/evidence/mvp-1.3/performance-report.md) |
 
 **Test Environment**: Ubuntu 22.04, 4-8 vCPUs, CMake Release build
 

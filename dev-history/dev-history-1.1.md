@@ -302,6 +302,50 @@ struct MovementInput {
 };
 EOF
 
+**🎮 Fire Input 프로토콜 상세**
+
+**WebSocket Input Frame** (확장):
+```
+input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y> [fire]
+```
+
+**Fire 필드**:
+- **타입**: int (선택적 필드)
+- **값**: `1` (발사), `0` (미발사)
+- **기본값**: `0` (필드 생략 시)
+- **쿨다운**: 0.1초 (10발/초 제한)
+- **하위 호환성**: MVP 1.0 클라이언트는 fire 필드 생략 가능
+
+**프로토콜 예제**:
+```bash
+# MVP 1.0 호환 (fire 없음)
+input player1 0 1 0 0 0 150.5 200.0
+
+# MVP 1.1 (fire 포함 - 발사 안 함)
+input player2 1 0 1 0 0 120.0 180.0 0
+
+# MVP 1.1 (fire 포함 - 발사)
+input attacker 5 1 0 0 1 200.0 150.0 1
+```
+
+**서버 파싱 로직** (`server/src/network/websocket_server.cpp:174-175`):
+```cpp
+int fire = 0;
+iss >> player_id >> input.sequence >> up >> down >> left >> right >> input.mouse_x >> input.mouse_y;
+if (!(iss >> fire)) {
+    fire = 0;  // Optional field - default to 0
+}
+input.fire = fire != 0;
+```
+
+**쿨다운 검사** (`server/src/game/game_session.cpp:517`):
+```cpp
+constexpr double kFireCooldown = 0.1;  // 10 shots/sec
+if ((elapsed_time_ - runtime.last_fire_time) < kFireCooldown) {
+    return;  // Cooldown not elapsed, ignore fire request
+}
+```
+
 # Step 3.4: PlayerState 확장
 cat > server/include/arena60/game/player_state.h << 'EOF'
 struct PlayerState {
