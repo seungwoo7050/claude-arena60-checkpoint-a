@@ -284,7 +284,7 @@ MVP 1.0 Phase
 🎯 목표
 60 TPS 게임 루프 + WebSocket 서버 + PostgreSQL 통합
 📌 선택의 순간 #4: 게임 루프 설계
-문제: 어떻게 정확히 60 TPS를 유지할 것인가?
+문제: 어떻게 정확히 60 TPS를 유지하면서 graceful shutdown도 지원할 것인가?
 후보:
 
 ❌ Busy-wait 루프: while(true) { if(elapsed > 16ms) tick(); }
@@ -297,31 +297,48 @@ MVP 1.0 Phase
 단점: sleep 오버헤드로 jitter 발생
 
 
-✅ sleep_until() 스케줄링: next_frame += 16.67ms; sleep_until(next_frame);
+❌ sleep_until() 스케줄링: next_frame += 16.67ms; sleep_until(next_frame);
 
 장점: 누적 오차 없음, CPU 효율적
+단점: stop 신호 무시 (종료 시 최대 16ms 대기)
+
+
+✅ condition_variable::wait_for(): sleep_duration 대기 또는 stop 신호 시 즉시 반환
+
+장점: Tick rate 정확도 + Graceful shutdown + CPU 효율적
 
 
 
-최종 선택: Fixed-step loop with std::chrono::steady_clock
-구현:
-cppvoid GameLoop::Run() {
+최종 선택: Fixed-step loop with condition_variable
+구현 (`server/src/core/game_loop.cpp:126-128`):
+```cpp
+void GameLoop::Run() {
     auto next_frame = std::chrono::steady_clock::now();
-    while (running_) {
+    while (!stop_requested_) {
         auto frame_start = std::chrono::steady_clock::now();
-        
+
         // 게임 로직 실행
         callback_(TickInfo{tick_counter_, delta_seconds, frame_start});
-        
+
         // 다음 프레임 시간 계산 (누적 오차 방지)
         next_frame += target_delta_;
-        
-        // 정밀 대기
-        std::this_thread::sleep_until(next_frame);
+
+        // 정밀 대기: sleep_duration 타이머 OR stop 신호 대기
+        const auto sleep_duration = next_frame - std::chrono::steady_clock::now();
+        if (sleep_duration.count() > 0) {
+            std::unique_lock<std::mutex> lk(mutex_);
+            // sleep_duration 대기 또는 stop_requested_ 시 즉시 반환
+            stop_cv_.wait_for(lk, sleep_duration, [this]() { return stop_requested_; });
+        }
+
         ++tick_counter_;
     }
 }
 ```
+
+**핵심 차이점**:
+- `sleep_until`: 무조건 next_frame까지 대기 (종료 신호 무시)
+- `wait_for`: 타이머 만료 OR stop_requested_ 중 먼저 발생하는 이벤트에 반응
 
 ### 📌 선택의 순간 #5: WebSocket 프로토콜 설계
 

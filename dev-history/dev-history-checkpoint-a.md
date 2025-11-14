@@ -667,19 +667,34 @@ cat >> README.md << 'EOF'
 
 ### WebSocket Protocol (Port 8080)
 
-**Client → Server (Input)**:
+**📋 Complete Specification**: See [PROTOCOL.md](./PROTOCOL.md) for full details.
+
+**Quick Summary**:
+
+**Client → Server (Input Frame)** - 8-9 fields:
 ```
-input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y>
+input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y> [fire]
 ```
 
 Example:
 ```
 input player1 0 1 0 0 0 150.5 200.0
+input attacker 5 1 0 0 1 200.0 150.0 1
 ```
 
-**Server → Client (State)**:
+**Server → Client (State Frame)** - 11 fields:
 ```
-state <player_id> <x> <y> <angle> <tick>
+state <player_id> <x> <y> <facing_radians> <tick> <delta> <health> <is_alive> <shots_fired> <hits_landed> <deaths>
+```
+
+Example:
+```
+state player1 105.0 200.0 1.57 61 0.0167 80 1 10 5 0
+```
+
+**Server → Client (Death Event)** - 2 fields:
+```
+death <player_id> <tick>
 ```
 
 ### Option 1: wscat (Quick Test)
