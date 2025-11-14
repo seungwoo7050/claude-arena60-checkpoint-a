@@ -213,6 +213,60 @@ state player1 105.0 200.0 0.785 123
 death <player_id> <tick>
 ```
 
+### Option 1: wscat (Quick Test)
+
+**Install**:
+```bash
+npm install -g wscat
+```
+
+**Usage**:
+```bash
+# Connect to server
+wscat -c ws://localhost:8080
+
+# Send movement input (W key pressed, mouse at 150, 200)
+> input player1 0 1 0 0 0 150.5 200.0
+
+# Server responds with state
+< state player1 100.0 200.0 0.0 60
+< state player1 105.0 200.0 0.0 61
+< state player1 110.0 200.0 0.0 62
+
+# Send fire input (mouse click at 300, 100)
+> input player1 1 0 0 0 0 300.0 100.0
+
+# Server responds with state
+< state player1 115.0 200.0 1.047 63
+```
+
+**Input Format**:
+- `player_id`: Unique player identifier (e.g., "player1")
+- `seq`: Sequence number (incremental, for debugging)
+- `up down left right`: Movement keys (1 = pressed, 0 = released)
+- `mouse_x mouse_y`: Mouse cursor position (world coordinates)
+
+### Option 2: Python Test Client (Automated)
+
+**Install**:
+```bash
+pip install websockets
+```
+
+**Usage**:
+```bash
+# Run automated test
+python tools/test_client.py
+
+# Run with custom player ID
+python tools/test_client.py --player player2
+
+# Run multiple clients (stress test)
+python tools/test_client.py --clients 10
+```
+
+See `tools/README.md` for detailed usage.
+
 ### HTTP API (Port 8081)
 
 **Get Player Profile**:
