@@ -1,23 +1,30 @@
-Arena60 Checkpoint A 완성 - Documentation & Testing Tools
-📋 추가 작업 개요
-🎯 목적
+# Arena60 Checkpoint A 완성 - Documentation & Testing Tools
+
+## 📋 추가 작업 개요
+
+### 🎯 목적
+
 MVP 1.0-1.3 기술 구현 완료 후, 프로덕션 레디 및 포트폴리오 제시를 위한 최종 마무리:
 
-사용자 친화적 README - 누구나 빌드하고 실행 가능
-자동화된 테스트 도구 - 수동 wscat을 넘어선 스트레스 테스트
-완전한 문서화 - 아키텍처, 프로토콜, API, 모니터링
+- 사용자 친화적 README - 누구나 빌드하고 실행 가능
+- 자동화된 테스트 도구 - 수동 wscat을 넘어선 스트레스 테스트
+- 완전한 문서화 - 아키텍처, 프로토콜, API, 모니터링
 
-📊 변경 규모
+### 📊 변경 규모
 
-파일 추가: 2개 (test_client.py, tools/README.md)
-파일 수정: 1개 (README.md: 33줄 → 544줄)
-총 라인 수: ~900줄 추가
+- 파일 추가: 2개 (test_client.py, tools/README.md)
+- 파일 수정: 1개 (README.md: 33줄 → 544줄)
+- 총 라인 수: ~900줄 추가
 
+---
 
-🔍 작업 상세 분석
-📌 작업 #1: README.md 대폭 개선
-문제: 기존 README는 프로젝트 개요만 제공, 신규 사용자가 실행하기 어려움
-개선 내용:
+## 🔍 작업 상세 분석
+
+### 📌 작업 #1: README.md 대폭 개선
+
+**문제**: 기존 README는 프로젝트 개요만 제공, 신규 사용자가 실행하기 어려움
+
+**개선 내용**:
 1️⃣ 프로젝트 정체성 명확화
 Before:
 markdown# Arena60 - Production Battle Arena Games

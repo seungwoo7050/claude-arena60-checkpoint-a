@@ -1,14 +1,18 @@
-Arena60 - 개발 역사: Bootstrap & CI/CD & MVP 1.0
-📋 목차
+# Arena60 - 개발 역사: Bootstrap & CI/CD & MVP 1.0
 
-Bootstrap Phase - 프로젝트 골격
-CI/CD Phase - 자동화 파이프라인
-MVP 1.0 Phase - 게임 서버 구현
-선택의 순간들 (Decision Points)
+## 📋 목차
 
+- Bootstrap Phase - 프로젝트 골격
+- CI/CD Phase - 자동화 파이프라인
+- MVP 1.0 Phase - 게임 서버 구현
+- 선택의 순간들 (Decision Points)
 
-Bootstrap Phase
-🎯 목표
+---
+
+## Bootstrap Phase
+
+### 🎯 목표
+
 빈 저장소에서 빌드 가능한 최소 프로젝트 구조 생성
 📝 파일 생성 순서
 bash# Step 1: 프로젝트 루트 메타데이터
