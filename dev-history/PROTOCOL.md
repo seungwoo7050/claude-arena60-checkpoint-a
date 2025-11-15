@@ -19,7 +19,7 @@ Arena60 uses **text-based WebSocket frames** for client-server communication. Al
 Sends player input state to the server.
 
 **Format**:
-```
+```text
 input <player_id> <sequence> <up> <down> <left> <right> <mouse_x> <mouse_y> [fire]
 ```
 
@@ -37,7 +37,7 @@ input <player_id> <sequence> <up> <down> <left> <right> <mouse_x> <mouse_y> [fir
 | `fire` | int | **Optional** - Mouse button pressed (1) or released (0) | `1` |
 
 **Examples**:
-```
+```text
 input player1 0 1 0 0 0 150.5 200.3
 input player2 1 0 1 0 0 120.0 180.0 1
 input attacker 5 1 0 0 1 200.0 150.0 1
@@ -59,7 +59,7 @@ input attacker 5 1 0 0 1 200.0 150.0 1
 Broadcasts current game state to all connected clients.
 
 **Format**:
-```
+```text
 state <player_id> <x> <y> <facing_radians> <tick> <delta> <health> <is_alive> <shots_fired> <hits_landed> <deaths>
 ```
 
@@ -79,7 +79,7 @@ state <player_id> <x> <y> <facing_radians> <tick> <delta> <health> <is_alive> <s
 | `deaths` | uint32 | Cumulative deaths | `0` |
 
 **Example**:
-```
+```text
 state player1 105.0 200.0 1.57 61 0.0167 80 1 10 5 0
 ```
 
@@ -94,7 +94,7 @@ state player1 105.0 200.0 1.57 61 0.0167 80 1 10 5 0
 Notifies all clients when a player dies.
 
 **Format**:
-```
+```text
 death <player_id> <tick>
 ```
 
@@ -105,7 +105,7 @@ death <player_id> <tick>
 | `tick` | uint64 | Tick when death occurred | `150` |
 
 **Example**:
-```
+```text
 death defender 150
 ```
 
@@ -119,7 +119,7 @@ death defender 150
 
 ### Combat Scenario
 
-```
+```text
 # Client connects
 [Client → Server]
 input player1 0 0 0 0 0 100.0 100.0
@@ -180,11 +180,11 @@ std::cerr << "invalid input frame: " << data << std::endl;
 
 ## Future Extensions (Checkpoint B+)
 
-- Binary Protocol Buffers for efficiency
-- UDP for state sync (low latency)
-- Delta compression (reduce bandwidth)
-- Skill activation messages
-- Item pickup notifications
+- **Binary Protocol Buffers** for efficiency
+- **UDP** for state sync (low latency)
+- **Delta compression** (reduce bandwidth)
+- **Skill activation messages**
+- **Item pickup notifications**
 
 ---
 
