@@ -28,7 +28,7 @@
 
 ### **현재 상태 (dev-history-checkpoint-a.md:670-679)**
 
-```markdown
+```text
 Client → Server:
 input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y>
 
@@ -207,7 +207,8 @@ input_msg = f"input {self.player_id} {self.seq} {up} {down} {left} {right} {mous
 
 모든 코드 블록에 파일 경로 추가:
 
-```markdown
+**예시 형식**:
+
 **ELO 계산 구현** (`server/src/stats/player_profile_service.cpp:15-20`):
 ```cpp
 constexpr double kFactor = 25.0;
@@ -220,7 +221,6 @@ const int winner_new = static_cast<int>(
 ```cpp
 static constexpr double kSpeed_ = 30.0;    // meters per second
 static constexpr double kLifetime_ = 1.5;  // seconds
-```
 ```
 
 ---
