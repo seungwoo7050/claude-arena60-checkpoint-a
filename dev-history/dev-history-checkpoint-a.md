@@ -25,39 +25,53 @@ MVP 1.0-1.3 기술 구현 완료 후, 프로덕션 레디 및 포트폴리오 �
 **문제**: 기존 README는 프로젝트 개요만 제공, 신규 사용자가 실행하기 어려움
 
 **개선 내용**:
-1️⃣ 프로젝트 정체성 명확화
+
+**1️⃣ 프로젝트 정체성 명확화**
+
 Before:
-markdown# Arena60 - Production Battle Arena Games
+```markdown
+# Arena60 - Production Battle Arena Games
 
 **Phase 2** of Arena60 project
+```
+
 After:
-markdown# Arena60 - Real-time 1v1 Duel Game Server
+```markdown
+# Arena60 - Real-time 1v1 Duel Game Server
 
 Production-quality game server for Korean game industry portfolio.
 Built with C++17, Boost.Asio/Beast, PostgreSQL, and Prometheus.
 
-**Tech Stack**: C++17 · Boost 1.82+ · PostgreSQL 15 · Redis 7 · 
+**Tech Stack**: C++17 · Boost 1.82+ · PostgreSQL 15 · Redis 7 ·
                 Protocol Buffers · Docker · Prometheus · WebSocket
-효과:
+```
 
-한눈에 프로젝트 목적 파악 (포트폴리오 + 한국 게임 업계)
-기술 스택 명시로 채용 담당자 관심 유도
-"Production-quality" 강조
+**효과**:
 
-2️⃣ 완성도 표시 (Status)
-markdown## Status: Checkpoint A Complete ✅
+- 한눈에 프로젝트 목적 파악 (포트폴리오 + 한국 게임 업계)
+- 기술 스택 명시로 채용 담당자 관심 유도
+- "Production-quality" 강조
+
+**2️⃣ 완성도 표시 (Status)**
+
+```markdown
+## Status: Checkpoint A Complete ✅
 
 - [x] **Checkpoint A**: 1v1 Duel Game (MVP 1.0-1.3)
 - [ ] Checkpoint B: 60-player Battle Royale
 - [ ] Checkpoint C: Esports Platform
-효과:
+```
 
-진행 상황 명확
-체크박스로 시각적 완성도 표현
-Checkpoint A 완료 강조 (✅)
+**효과**:
 
-3️⃣ Feature List (MVP별 분류)
-markdown## Features (Checkpoint A)
+- 진행 상황 명확
+- 체크박스로 시각적 완성도 표현
+- Checkpoint A 완료 강조 (✅)
+
+**3️⃣ Feature List (MVP별 분류)**
+
+```markdown
+## Features (Checkpoint A)
 
 ### MVP 1.0: Basic Game Server ✅
 - **WebSocket server** (Boost.Beast) - Real-time bidirectional communication
@@ -81,15 +95,19 @@ markdown## Features (Checkpoint A)
 - **ELO rating** - K-factor 25 adjustment
 - **Global leaderboard** - In-memory sorted by rating
 - **HTTP API** - JSON endpoints
-효과:
-
-기능을 MVP별로 체계적 정리
-각 기능에 구체적 수치 명시 (60 TPS, 30 m/s, K=25)
-기술적 깊이 표현 (예: "Fixed-step deterministic physics")
-
-4️⃣ Architecture Diagram (ASCII Art)
-markdown## Architecture
 ```
+
+**효과**:
+
+- 기능을 MVP별로 체계적 정리
+- 각 기능에 구체적 수치 명시 (60 TPS, 30 m/s, K=25)
+- 기술적 깊이 표현 (예: "Fixed-step deterministic physics")
+
+**4️⃣ Architecture Diagram (ASCII Art)**
+
+```text
+## Architecture
+
 ┌─────────────────────────────────────────────────────────────┐
 │                         Clients                              │
 │                  (WebSocket connections)                     │
@@ -112,14 +130,17 @@ markdown## Architecture
 │ PostgreSQL   │ │ Redis      │ │ Prometheus  │
 └──────────────┘ └────────────┘ └─────────────┘
 ```
-효과:
 
-시스템 구조 한눈에 파악
-컴포넌트 간 관계 명확
-텍스트 기반으로 GitHub에서 바로 표시
+**효과**:
 
-5️⃣ Performance Benchmarks Table
-markdown## Performance Benchmarks
+- 시스템 구조 한눈에 파악
+- 컴포넌트 간 관계 명확
+- 텍스트 기반으로 GitHub에서 바로 표시
+
+**5️⃣ Performance Benchmarks Table**
+
+```markdown
+## Performance Benchmarks
 
 | Metric | Target | Actual | Status |
 |--------|--------|--------|--------|
@@ -130,15 +151,19 @@ markdown## Performance Benchmarks
 | Profile service (100 matches) | ≤ 5 ms | **< 1 ms** | ✅ |
 
 **Test Environment**: Ubuntu 22.04, 4-8 vCPUs, CMake Release build
-효과:
+```
 
-KPI 달성 증명
-정량적 성능 표현 (채용 담당자가 선호)
-타겟 대비 실제 수치 비교
+**효과**:
 
-6️⃣ Quick Start 확장 (5단계 → 실행까지)
+- KPI 달성 증명
+- 정량적 성능 표현 (채용 담당자가 선호)
+- 타겟 대비 실제 수치 비교
+
+**6️⃣ Quick Start 확장 (5단계 → 실행까지)**
+
 Before:
-bash# Start infrastructure
+```bash
+# Start infrastructure
 cd deployments/docker
 docker-compose up -d
 
@@ -150,22 +175,29 @@ make
 
 # Run tests
 ctest
+```
+
 After:
-markdown### 1. Install Dependencies (vcpkg)
-### 2. Start Infrastructure  
+```markdown
+### 1. Install Dependencies (vcpkg)
+### 2. Start Infrastructure
 ### 3. Build Server
 ### 4. Run Tests
 ### 5. Run Server
 
 # 각 단계마다 상세한 명령어와 설명 포함
-효과:
+```
 
-단계별 명확한 가이드
-예상 출력 포함 (사용자가 성공 여부 확인 가능)
-vcpkg 설정 명시
+**효과**:
 
-7️⃣ Testing the Server (프로토콜 문서화)
-markdown## Testing the Server
+- 단계별 명확한 가이드
+- 예상 출력 포함 (사용자가 성공 여부 확인 가능)
+- vcpkg 설정 명시
+
+**7️⃣ Testing the Server (프로토콜 문서화)**
+
+```markdown
+## Testing the Server
 
 ### WebSocket Protocol (Port 8080)
 
@@ -181,14 +213,18 @@ input player1 0 1 0 0 0 150.5 200.0
 
 ### Option 1: wscat (Quick Test)
 ### Option 2: Python Test Client (Automated)
-효과:
+```
 
-프로토콜 명세 문서화
-두 가지 테스트 방법 제공 (수동/자동)
-구체적 예제로 학습 용이
+**효과**:
 
-8️⃣ HTTP API Documentation
-markdown### HTTP API (Port 8081)
+- 프로토콜 명세 문서화
+- 두 가지 테스트 방법 제공 (수동/자동)
+- 구체적 예제로 학습 용이
+
+**8️⃣ HTTP API Documentation**
+
+```markdown
+### HTTP API (Port 8081)
 
 **Get Player Profile**:
 ```bash
@@ -204,11 +240,13 @@ Response:
   ...
 }
 ```
-효과:
+```
 
-REST API 문서화
-curl 명령어로 즉시 테스트 가능
-응답 예제로 JSON 구조 파악
+**효과**:
+
+- REST API 문서화
+- curl 명령어로 즉시 테스트 가능
+- 응답 예제로 JSON 구조 파악
 
 9️⃣ Monitoring (Prometheus + Grafana)
 markdown## Monitoring
