@@ -35,9 +35,11 @@ ELO 기반 실시간 매치메이킹 시스템 - Redis 백엔드 큐, 동적 tol
 
 
 
-최종 선택: Dual Implementation
-구현:
-cppclass MatchQueue {  // 인터페이스
+**최종 선택**: Dual Implementation
+
+**구현**:
+```cpp
+class MatchQueue {  // 인터페이스
 public:
     virtual void Upsert(const MatchRequest& request, std::uint64_t order) = 0;
     virtual bool Remove(const std::string& player_id) = 0;
@@ -54,20 +56,33 @@ class InMemoryMatchQueue : public MatchQueue {
 class RedisMatchQueue : public MatchQueue {
     InMemoryMatchQueue fallback_;  // 실제 동작
     std::ostream* stream_;         // Redis 명령 로깅
-    
+
     void Upsert(...) override {
         (*stream_) << "ZADD matchmaking_queue " << elo << ' ' << player_id;
         fallback_.Upsert(...);  // 실제로는 메모리에서 동작
     }
 };
-이유: MVP 1.2에서는 InMemory 사용, MVP 2.0+ (다중 서버)에서 Redis로 전환
-📌 선택 #2: Tolerance Expansion 알고리즘
-문제: 대기 시간에 따라 ELO 허용 범위를 어떻게 확대할 것인가?
-후보 및 계산:
-방식공식5초10초20초장점단점Linear ✅100 + ⌊t/5⌋×25±100±125±175예측 가능느린 확장Exponential100 × 1.2^⌊t/5⌋±120±144±207빠른 매칭불균형 매치Step100 (0-10s), 200 (10s+)±100±200±200단순급격한 변화
-최종 선택: Linear (base=100, step=25, interval=5s)
-선택 근거:
-cpp// ELO 1200 플레이어의 tolerance 변화
+```
+
+**이유**: MVP 1.2에서는 InMemory 사용, MVP 2.0+ (다중 서버)에서 Redis로 전환
+
+### 📌 선택 #2: Tolerance Expansion 알고리즘
+
+**문제**: 대기 시간에 따라 ELO 허용 범위를 어떻게 확대할 것인가?
+
+**후보 및 계산**:
+
+| 방식 | 공식 | 5초 | 10초 | 20초 | 장점 | 단점 |
+|------|------|-----|------|------|------|------|
+| **Linear** ✅ | 100 + ⌊t/5⌋×25 | ±100 | ±125 | ±175 | 예측 가능 | 느린 확장 |
+| Exponential | 100 × 1.2^⌊t/5⌋ | ±120 | ±144 | ±207 | 빠른 매칭 | 불균형 매치 |
+| Step | 100 (0-10s), 200 (10s+) | ±100 | ±200 | ±200 | 단순 | 급격한 변화 |
+
+**최종 선택**: Linear (base=100, step=25, interval=5s)
+
+**선택 근거**:
+```cpp
+// ELO 1200 플레이어의 tolerance 변화
 Wait Time | Tolerance Range | 설명
 ----------|-----------------|------
 0-5s      | 1100-1300       | 초기 품질 우선
@@ -82,7 +97,11 @@ int MatchRequest::CurrentTolerance(time_point now) const {
     const int increments = static_cast<int>(waited / 5.0);
     return 100 + increments * 25;  // 선형 증가
 }
-균형점: 10초 대기 시 ±125 ELO → 50점 차이까지 매치 가능
+```
+
+**균형점**: 10초 대기 시 ±125 ELO → 50점 차이까지 매치 가능
+
+---
 📌 선택 #3: Queue 데이터 구조
 문제: ELO 정렬 + 삽입 순서 유지를 어떻게 구현할 것인가?
 후보:
