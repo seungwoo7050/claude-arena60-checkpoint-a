@@ -469,48 +469,70 @@ All 10 clients finished
 서버 tick rate 안정성 (부하 하 60 TPS 유지?)
 메모리 누수 (장시간 실행)
 
-시나리오 3: 전투 시뮬레이션
-bash# 터미널 1
+**시나리오 3**: 전투 시뮬레이션
+
+```bash
+# 터미널 1
 python tools/test_client.py --player attacker --duration 20
 
 # 터미널 2
 python tools/test_client.py --player defender --duration 20
+```
+
 검증 항목:
+- 2 플레이어 전투
+- Death event 발생
+- 매치 통계 수집
 
-2 플레이어 전투
-Death event 발생
-매치 통계 수집
+**시나리오 4**: 원격 서버 테스트
 
-시나리오 4: 원격 서버 테스트
-bashpython tools/test_client.py --host 192.168.1.100 --port 9000 --duration 60
+```bash
+python tools/test_client.py --host 192.168.1.100 --port 9000 --duration 60
+```
+
 검증 항목:
+- 네트워크 지연
+- 원격 배포 환경 테스트
 
-네트워크 지연
-원격 배포 환경 테스트
+---
 
+### 📌 작업 #3: tools/README.md (상세 사용 가이드)
 
-📌 작업 #3: tools/README.md (상세 사용 가이드)
-목적: test_client.py 완전한 매뉴얼 제공
-주요 섹션
-1️⃣ Features (강조)
-markdown### Features
+**목적**: test_client.py 완전한 매뉴얼 제공
+
+**주요 섹션**
+
+**1️⃣ Features (강조)**
+
+```markdown
+### Features
 
 - **Automated gameplay simulation** - Sends random movement and fire inputs
 - **Multiple concurrent clients** - Stress test with multiple players
 - **Real-time output** - Displays sent/received messages
 - **Configurable** - Customize host, port, player ID, duration
+```
+
 효과: 기능 한눈에 파악
-2️⃣ Command-Line Options Table
-markdown| Option | Default | Description |
+
+**2️⃣ Command-Line Options Table**
+
+```markdown
+| Option | Default | Description |
 |--------|---------|-------------|
 | `--host` | `localhost` | Server hostname or IP |
 | `--port` | `8080` | WebSocket port |
 | `--player` | `player1` | Player ID |
 | `--clients` | `1` | Number of concurrent clients |
 | `--duration` | `5.0` | Test duration in seconds |
+```
+
 효과: 옵션을 표로 정리 (가독성)
-3️⃣ Input Simulation 설명
-markdown### Input Simulation
+
+**3️⃣ Input Simulation 설명**
+
+```markdown
+### Input Simulation
 
 The test client simulates realistic player behavior:
 
@@ -525,45 +547,67 @@ The test client simulates realistic player behavior:
 **Input Rate**:
 - ~60 inputs per second (16ms interval)
 - Matches typical game client behavior
+```
+
 효과: 시뮬레이션 로직 투명하게 공개
-4️⃣ Error Handling
-markdown### Error Handling
+
+**4️⃣ Error Handling**
+
+```markdown
+### Error Handling
 
 **Connection refused**:
-```
+```text
 [player1] Connection refused. Is the server running?
 ```
 
 → Check if server is running: `docker ps` or `./arena60_server`
+```
+
 효과: 에러 메시지 → 해결 방법 매핑
-5️⃣ Use Cases (실전 예제)
-markdown### Use Cases
+
+**5️⃣ Use Cases (실전 예제)**
+
+```markdown
+### Use Cases
 
 **1. Smoke Test**
 **2. Movement Test**
 **3. Combat Test**
 **4. Load Test**
 **5. Endurance Test**
+```
+
 효과: 상황별 사용법 제시
-6️⃣ Interpreting Output (출력 해석)
-markdown### Interpreting Output
+
+**6️⃣ Interpreting Output (출력 해석)**
+
+```markdown
+### Interpreting Output
 
 **Normal operation**:
-```
+```text
 [player1] -> input player1 0 1 0 0 0 150.5 200.3
 [player1] <- state player1 105.0 200.0 0.0 61
 ```
+
 → Server responding normally, player position updating
 
 **No response**:
-```
+```text
 [player1] -> input player1 0 1 0 0 0 150.5 200.3
 (no state received)
 ```
+
 → Check server logs, possible crash or deadlock
+```
+
 효과: 출력을 보고 문제 진단 가능
-7️⃣ CI/CD Integration
-yaml# GitHub Actions example
+
+**7️⃣ CI/CD Integration**
+
+```yaml
+# GitHub Actions example
 - name: Test game server
   run: |
     ./arena60_server &
@@ -572,9 +616,12 @@ yaml# GitHub Actions example
     killall arena60_server
 효과: 자동화 파이프라인에 통합 가능
 
-📝 완성 작업 순서
-Phase 1: README.md 개선
-bash# ========================================
+## 📝 완성 작업 순서
+
+### Phase 1: README.md 개선
+
+```bash
+# ========================================
 # Step 1: 프로젝트 정체성 강화
 # ========================================
 cat > README.md << 'EOF'
@@ -1019,9 +1066,12 @@ cat >> README.md << 'EOF'
 **Target**: Korean Game Server Developer positions
 **Checkpoint A**: Complete (MVP 1.0-1.3)
 EOF
+```
 
-Phase 2: Python Test Client 구현
-bash# ========================================
+### Phase 2: Python Test Client 구현
+
+```bash
+# ========================================
 # Step 15: test_client.py 뼈대
 # ========================================
 cat > tools/test_client.py << 'EOF'
@@ -1206,9 +1256,12 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+```
 
-Phase 3: tools/README.md 작성
-bash# ========================================
+### Phase 3: tools/README.md 작성
+
+```bash
+# ========================================
 # Step 21: tools/README.md
 # ========================================
 cat > tools/README.md << 'EOF'
@@ -1418,10 +1471,14 @@ Planned utilities:
 - `test_http.py` - Test HTTP endpoints
 - `benchmark.py` - Automated benchmarking
 EOF
+```
 
-🔧 실행 및 검증
-Step 1: 테스트 클라이언트 설치 및 실행
-bash# ========================================
+## 🔧 실행 및 검증
+
+### Step 1: 테스트 클라이언트 설치 및 실행
+
+```bash
+# ========================================
 # 1단계: 의존성 설치
 # ========================================
 pip install websockets
@@ -1531,73 +1588,88 @@ curl http://localhost:8081/leaderboard?limit=2
 curl http://localhost:8081/metrics | grep -E "(game_tick_rate|player_profiles_total)"
 # game_tick_rate 60.0
 # player_profiles_total 2
+```
 
-📊 최종 검증 체크리스트
-✅ README.md 개선
+## 📊 최종 검증 체크리스트
 
- 프로젝트 정체성 명확화 (포트폴리오 목적)
- Status 섹션 (Checkpoint A 완료 표시)
- Feature list (MVP별 분류)
- Architecture diagram (ASCII art)
- Performance benchmarks table
- Quick Start 5단계 확장
- WebSocket 프로토콜 문서화
- HTTP API 예제
- Monitoring 가이드
- Testing 가이드
- Troubleshooting 섹션
- Tech Stack 근거
- Next Steps (Checkpoint B)
+### ✅ README.md 개선
 
-✅ test_client.py 구현
+- 프로젝트 정체성 명확화 (포트폴리오 목적)
+- Status 섹션 (Checkpoint A 완료 표시)
+- Feature list (MVP별 분류)
+- Architecture diagram (ASCII art)
+- Performance benchmarks table
+- Quick Start 5단계 확장
+- WebSocket 프로토콜 문서화
+- HTTP API 예제
+- Monitoring 가이드
+- Testing 가이드
+- Troubleshooting 섹션
+- Tech Stack 근거
+- Next Steps (Checkpoint B)
 
- Arena60Client 클래스
- 비동기 WebSocket 연결
- 게임플레이 시뮬레이션 (랜덤 입력)
- 단일/다중 클라이언트 지원
- CLI 인터페이스 (argparse)
- 에러 핸들링
- 실시간 출력 (송신/수신 메시지)
- 통계 출력 (총 입력 수)
+### ✅ test_client.py 구현
 
-✅ tools/README.md 작성
+- Arena60Client 클래스
+- 비동기 WebSocket 연결
+- 게임플레이 시뮬레이션 (랜덤 입력)
+- 단일/다중 클라이언트 지원
+- CLI 인터페이스 (argparse)
+- 에러 핸들링
+- 실시간 출력 (송신/수신 메시지)
+- 통계 출력 (총 입력 수)
 
- 기능 설명
- 설치 가이드
- 기본 사용법
- CLI 옵션 테이블
- 예제 (단일/다중/전투/스트레스)
- 입력 시뮬레이션 설명
- 프로토콜 문서화
- 에러 핸들링
- 사용 사례
- 출력 해석 가이드
- CI/CD 통합 예제
- wscat 대안 설명
+### ✅ tools/README.md 작성
 
-✅ 통합 검증
+- 기능 설명
+- 설치 가이드
+- 기본 사용법
+- CLI 옵션 테이블
+- 예제 (단일/다중/전투/스트레스)
+- 입력 시뮬레이션 설명
+- 프로토콜 문서화
+- 에러 핸들링
+- 사용 사례
+- 출력 해석 가이드
+- CI/CD 통합 예제
+- wscat 대안 설명
 
- test_client.py 실행 가능
- 단일 클라이언트 정상 동작
- 10 클라이언트 스트레스 테스트 통과
- 전투 시뮬레이션 (2 플레이어)
- Death event 정상 수신
- HTTP API 정상 동작
- Prometheus 메트릭 정상
+### ✅ 통합 검증
 
+- test_client.py 실행 가능
+- 단일 클라이언트 정상 동작
+- 10 클라이언트 스트레스 테스트 통과
+- 전투 시뮬레이션 (2 플레이어)
+- Death event 정상 수신
+- HTTP API 정상 동작
+- Prometheus 메트릭 정상
 
-🎓 핵심 교훈 (Documentation & Testing)
+---
 
-README는 프로젝트의 얼굴 - 첫인상이 전부, 5분 안에 파악 가능해야
-ASCII 다이어그램은 강력 - 텍스트 기반이지만 시각적 효과
-성능 수치는 신뢰 구축 - 정량적 증거 (0.04ms, 18.3ms)
-Quick Start는 단계별 - 1→2→3→4→5, 각 단계 검증 가능
-테스트 도구는 자동화 - wscat < Python client (반복 가능)
-프로토콜 문서화 필수 - 누구나 클라이언트 작성 가능
-에러 메시지 → 해결책 - Troubleshooting 섹션으로 지원 부담 감소
-CI/CD 통합 예제 - 엔터프라이즈 수준 인상
+## 🎓 핵심 교훈 (Documentation & Testing)
 
+- README는 프로젝트의 얼굴 - 첫인상이 전부, 5분 안에 파악 가능해야
+- ASCII 다이어그램은 강력 - 텍스트 기반이지만 시각적 효과
+- 성능 수치는 신뢰 구축 - 정량적 증거 (0.04ms, 18.3ms)
+- Quick Start는 단계별 - 1→2→3→4→5, 각 단계 검증 가능
+- 테스트 도구는 자동화 - wscat < Python client (반복 가능)
+- 프로토콜 문서화 필수 - 누구나 클라이언트 작성 가능
+- 에러 메시지 → 해결책 - Troubleshooting 섹션으로 지원 부담 감소
+- CI/CD 통합 예제 - 엔터프라이즈 수준 인상
 
-🔄 변경 요약
-영역BeforeAfter효과README 길이33줄544줄16배 확장, 완전한 문서Quick Start3 단계5 단계실행까지 명확한 가이드테스트 방법wscat만wscat + Python자동화 가능프로토콜없음완전 문서화클라이언트 개발 가능아키텍처없음ASCII 다이어그램시각적 이해성능 증명없음벤치마크 테이블정량적 증거모니터링없음Prometheus 가이드운영 레디트러블슈팅없음6개 시나리오지원 부담 감소
-완성도: Checkpoint A는 이제 포트폴리오 제출 가능 수준! 🚀
+---
+
+## 🔄 변경 요약
+
+| 영역 | Before | After | 효과 |
+|------|--------|-------|------|
+| README 길이 | 33줄 | 544줄 | 16배 확장, 완전한 문서 |
+| Quick Start | 3 단계 | 5 단계 | 실행까지 명확한 가이드 |
+| 테스트 방법 | wscat만 | wscat + Python | 자동화 가능 |
+| 프로토콜 | 없음 | 완전 문서화 | 클라이언트 개발 가능 |
+| 아키텍처 | 없음 | ASCII 다이어그램 | 시각적 이해 |
+| 성능 증명 | 없음 | 벤치마크 테이블 | 정량적 증거 |
+| 모니터링 | 없음 | Prometheus 가이드 | 운영 레디 |
+| 트러블슈팅 | 없음 | 6개 시나리오 | 지원 부담 감소 |
+
+**완성도: Checkpoint A는 이제 포트폴리오 제출 가능 수준! 🚀**
