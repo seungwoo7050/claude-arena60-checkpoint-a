@@ -248,8 +248,10 @@ Response:
 - curl 명령어로 즉시 테스트 가능
 - 응답 예제로 JSON 구조 파악
 
-9️⃣ Monitoring (Prometheus + Grafana)
-markdown## Monitoring
+**9️⃣ Monitoring (Prometheus + Grafana)**
+
+```markdown
+## Monitoring
 
 ### Prometheus Metrics
 
@@ -264,14 +266,18 @@ markdown## Monitoring
 ### Grafana Dashboard
 
 Access at `http://localhost:3000`
-효과:
+```
 
-운영 가능한 수준의 모니터링
-메트릭 목록으로 관찰 가능 지표 명확
-실무 경험 강조
+**효과**:
 
-🔟 Troubleshooting Section
-markdown## Troubleshooting
+- 운영 가능한 수준의 모니터링
+- 메트릭 목록으로 관찰 가능 지표 명확
+- 실무 경험 강조
+
+**🔟 Troubleshooting Section**
+
+```markdown
+## Troubleshooting
 
 ### Build Errors
 
@@ -288,21 +294,39 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
 # Check PostgreSQL is running
 docker ps | grep postgres
 ```
-효과:
+```
 
-흔한 문제 선제 해결
-사용자 경험 개선
-지원 요청 감소
+**효과**:
 
+- 흔한 문제 선제 해결
+- 사용자 경험 개선
+- 지원 요청 감소
 
-📌 작업 #2: Python Test Client 구현
-문제: wscat은 수동 테스트만 가능, 스트레스 테스트 및 자동화 불가
-해결책: tools/test_client.py - 자동화된 WebSocket 클라이언트
-설계 결정
-측면결정이유언어Python 3.7+간단, 크로스 플랫폼, asyncio 지원라이브러리websockets표준, 비동기, 간결한 API프로토콜Text frames서버가 text 사용, 디버깅 용이입력 시뮬레이션랜덤 + 30% 확률실제 플레이어 행동 근사입력 주기16ms (60 FPS)클라이언트 표준 입력 레이트CLIargparse표준 라이브러리, 확장 가능
-핵심 구현
-1️⃣ Arena60Client 클래스
-pythonclass Arena60Client:
+---
+
+### 📌 작업 #2: Python Test Client 구현
+
+**문제**: wscat은 수동 테스트만 가능, 스트레스 테스트 및 자동화 불가
+
+**해결책**: tools/test_client.py - 자동화된 WebSocket 클라이언트
+
+**설계 결정**
+
+| 측면 | 결정 | 이유 |
+|------|------|------|
+| 언어 | Python 3.7+ | 간단, 크로스 플랫폼, asyncio 지원 |
+| 라이브러리 | websockets | 표준, 비동기, 간결한 API |
+| 프로토콜 | Text frames | 서버가 text 사용, 디버깅 용이 |
+| 입력 시뮬레이션 | 랜덤 + 30% 확률 | 실제 플레이어 행동 근사 |
+| 입력 주기 | 16ms (60 FPS) | 클라이언트 표준 입력 레이트 |
+| CLI | argparse | 표준 라이브러리, 확장 가능 |
+
+**핵심 구현**
+
+**1️⃣ Arena60Client 클래스**
+
+```python
+class Arena60Client:
     """WebSocket client for Arena60 game server."""
     
     def __init__(self, player_id: str, host: str = "localhost", port: int = 8080):
