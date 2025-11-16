@@ -101,30 +101,25 @@ int MatchRequest::CurrentTolerance(time_point now) const {
 
 **균형점**: 10초 대기 시 ±125 ELO → 50점 차이까지 매치 가능
 
----
-📌 선택 #3: Queue 데이터 구조
-문제: ELO 정렬 + 삽입 순서 유지를 어떻게 구현할 것인가?
-후보:
+### 📌 선택 #3: Queue 데이터 구조
 
-std::multimap<int, string> (ELO → player_id)
+**문제**: ELO 정렬 + 삽입 순서 유지를 어떻게 구현할 것인가?
 
-문제: 같은 ELO 내 삽입 순서 보장 안 됨
+**후보**:
 
+**1. std::multimap<int, string> (ELO → player_id)**
+- 문제: 같은 ELO 내 삽입 순서 보장 안 됨
 
-std::priority_queue (custom comparator)
+**2. std::priority_queue (custom comparator)**
+- 문제: Remove 연산 O(n), 중간 삭제 불가
 
-문제: Remove 연산 O(n), 중간 삭제 불가
+**3. ✅ std::map<int, std::list> + index (Redis ZSET 모방)**
+- 장점: ELO별 버킷, 리스트로 순서 유지, O(1) 삭제
 
+**최종 선택**: Bucketed List with Index
 
-✅ std::map<int, std::list> + index (Redis ZSET 모방)
-
-장점: ELO별 버킷, 리스트로 순서 유지, O(1) 삭제
-
-
-
-최종 선택: Bucketed List with Index
-구현:
-cppclass InMemoryMatchQueue {
+**구현**:
+```cppclass InMemoryMatchQueue {
 private:
     struct BucketEntry {
         MatchRequest request;
@@ -171,19 +166,32 @@ private:
 - FetchOrdered: O(n)
 
 **Redis 대응**:
-```
+```text
 Redis ZSET                    InMemoryMatchQueue
 -----------                   ------------------
 ZADD queue 1200 alice     →   buckets_[1200].push_back(alice, order)
 ZREM queue alice          →   index_[alice] → iterator → erase
 ZRANGE queue 0 -1         →   FetchOrdered() → sort by (elo, order)
-📌 선택 #4: 매칭 알고리즘 (Pairing Strategy)
-문제: O(n²) 전체 비교를 피하면서 공정한 매칭을 어떻게 보장할 것인가?
-후보:
-방식복잡도장점단점Greedy (First-Fit) ✅O(n²) worst구현 단순, 결정론적완전 최적 아님Stable MarriageO(n² log n)완전 최적과도한 복잡도Bucket-basedO(n)빠름tolerance 변화 시 불공정
-최종 선택: Greedy First-Fit with Early Break
-알고리즘:
-cppstd::vector<Match> RunMatching(time_point now) {
+```
+
+---
+
+### 📌 선택 #4: 매칭 알고리즘 (Pairing Strategy)
+
+**문제**: O(n²) 전체 비교를 피하면서 공정한 매칭을 어떻게 보장할 것인가?
+
+**후보**:
+
+| 방식 | 복잡도 | 장점 | 단점 |
+|------|--------|------|------|
+| **Greedy (First-Fit)** ✅ | O(n²) worst | 구현 단순, 결정론적 | 완전 최적 아님 |
+| Stable Marriage | O(n² log n) | 완전 최적 | 과도한 복잡도 |
+| Bucket-based | O(n) | 빠름 | tolerance 변화 시 불공정 |
+
+**최종 선택**: Greedy First-Fit with Early Break
+
+**알고리즘**:
+```cppstd::vector<Match> RunMatching(time_point now) {
     auto ordered = queue_->FetchOrdered();  // ELO 오름차순
     std::unordered_set<std::string> used;
     std::vector<Match> matches;
@@ -227,17 +235,23 @@ cppstd::vector<Match> RunMatching(time_point now) {
 3. 양방향 tolerance 검사 (A→B, B→A 모두 확인)
 
 **성능**:
-```
+```text
 Best:  O(n) - 모두 인접 ELO
 Worst: O(n²) - 모두 다른 ELO, 200 players = 19,900 비교
 Average: O(n log n) - 실제 테스트 < 2ms
-📌 선택 #5: 통지 패턴 (Notification Pattern)
-문제: 매치 생성 이벤트를 다른 컴포넌트에 어떻게 전달할 것인가?
-후보:
+```
 
-Callback only
+---
 
-cpp   SetMatchCreatedCallback([](const Match& m) { ... });
+### 📌 선택 #5: 통지 패턴 (Notification Pattern)
+
+**문제**: 매치 생성 이벤트를 다른 컴포넌트에 어떻게 전달할 것인가?
+
+**후보**:
+
+**1. Callback only**
+```cpp
+SetMatchCreatedCallback([](const Match& m) { ... });
 
 문제: 동기 실행, 콜백에서 블로킹 시 매칭 지연
 
