@@ -1,56 +1,77 @@
-Arena60 Checkpoint A 완성 - Documentation & Testing Tools
-📋 추가 작업 개요
-🎯 목적
+# Arena60 Checkpoint A 완성 - Documentation & Testing Tools
+
+## 📋 추가 작업 개요
+
+### 🎯 목적
+
 MVP 1.0-1.3 기술 구현 완료 후, 프로덕션 레디 및 포트폴리오 제시를 위한 최종 마무리:
 
-사용자 친화적 README - 누구나 빌드하고 실행 가능
-자동화된 테스트 도구 - 수동 wscat을 넘어선 스트레스 테스트
-완전한 문서화 - 아키텍처, 프로토콜, API, 모니터링
+- 사용자 친화적 README - 누구나 빌드하고 실행 가능
+- 자동화된 테스트 도구 - 수동 wscat을 넘어선 스트레스 테스트
+- 완전한 문서화 - 아키텍처, 프로토콜, API, 모니터링
 
-📊 변경 규모
+### 📊 변경 규모
 
-파일 추가: 2개 (test_client.py, tools/README.md)
-파일 수정: 1개 (README.md: 33줄 → 544줄)
-총 라인 수: ~900줄 추가
+- 파일 추가: 2개 (test_client.py, tools/README.md)
+- 파일 수정: 1개 (README.md: 33줄 → 544줄)
+- 총 라인 수: ~900줄 추가
 
+---
 
-🔍 작업 상세 분석
-📌 작업 #1: README.md 대폭 개선
-문제: 기존 README는 프로젝트 개요만 제공, 신규 사용자가 실행하기 어려움
-개선 내용:
-1️⃣ 프로젝트 정체성 명확화
+## 🔍 작업 상세 분석
+
+### 📌 작업 #1: README.md 대폭 개선
+
+**문제**: 기존 README는 프로젝트 개요만 제공, 신규 사용자가 실행하기 어려움
+
+**개선 내용**:
+
+**1️⃣ 프로젝트 정체성 명확화**
+
 Before:
-markdown# Arena60 - Production Battle Arena Games
+```markdown
+# Arena60 - Production Battle Arena Games
 
 **Phase 2** of Arena60 project
+```
+
 After:
-markdown# Arena60 - Real-time 1v1 Duel Game Server
+```markdown
+# Arena60 - Real-time 1v1 Duel Game Server
 
 Production-quality game server for Korean game industry portfolio.
 Built with C++17, Boost.Asio/Beast, PostgreSQL, and Prometheus.
 
-**Tech Stack**: C++17 · Boost 1.82+ · PostgreSQL 15 · Redis 7 · 
+**Tech Stack**: C++17 · Boost 1.82+ · PostgreSQL 15 · Redis 7 ·
                 Protocol Buffers · Docker · Prometheus · WebSocket
-효과:
+```
 
-한눈에 프로젝트 목적 파악 (포트폴리오 + 한국 게임 업계)
-기술 스택 명시로 채용 담당자 관심 유도
-"Production-quality" 강조
+**효과**:
 
-2️⃣ 완성도 표시 (Status)
-markdown## Status: Checkpoint A Complete ✅
+- 한눈에 프로젝트 목적 파악 (포트폴리오 + 한국 게임 업계)
+- 기술 스택 명시로 채용 담당자 관심 유도
+- "Production-quality" 강조
+
+**2️⃣ 완성도 표시 (Status)**
+
+```markdown
+## Status: Checkpoint A Complete ✅
 
 - [x] **Checkpoint A**: 1v1 Duel Game (MVP 1.0-1.3)
 - [ ] Checkpoint B: 60-player Battle Royale
 - [ ] Checkpoint C: Esports Platform
-효과:
+```
 
-진행 상황 명확
-체크박스로 시각적 완성도 표현
-Checkpoint A 완료 강조 (✅)
+**효과**:
 
-3️⃣ Feature List (MVP별 분류)
-markdown## Features (Checkpoint A)
+- 진행 상황 명확
+- 체크박스로 시각적 완성도 표현
+- Checkpoint A 완료 강조 (✅)
+
+**3️⃣ Feature List (MVP별 분류)**
+
+```markdown
+## Features (Checkpoint A)
 
 ### MVP 1.0: Basic Game Server ✅
 - **WebSocket server** (Boost.Beast) - Real-time bidirectional communication
@@ -74,15 +95,19 @@ markdown## Features (Checkpoint A)
 - **ELO rating** - K-factor 25 adjustment
 - **Global leaderboard** - In-memory sorted by rating
 - **HTTP API** - JSON endpoints
-효과:
-
-기능을 MVP별로 체계적 정리
-각 기능에 구체적 수치 명시 (60 TPS, 30 m/s, K=25)
-기술적 깊이 표현 (예: "Fixed-step deterministic physics")
-
-4️⃣ Architecture Diagram (ASCII Art)
-markdown## Architecture
 ```
+
+**효과**:
+
+- 기능을 MVP별로 체계적 정리
+- 각 기능에 구체적 수치 명시 (60 TPS, 30 m/s, K=25)
+- 기술적 깊이 표현 (예: "Fixed-step deterministic physics")
+
+**4️⃣ Architecture Diagram (ASCII Art)**
+
+```text
+## Architecture
+
 ┌─────────────────────────────────────────────────────────────┐
 │                         Clients                              │
 │                  (WebSocket connections)                     │
@@ -105,14 +130,17 @@ markdown## Architecture
 │ PostgreSQL   │ │ Redis      │ │ Prometheus  │
 └──────────────┘ └────────────┘ └─────────────┘
 ```
-효과:
 
-시스템 구조 한눈에 파악
-컴포넌트 간 관계 명확
-텍스트 기반으로 GitHub에서 바로 표시
+**효과**:
 
-5️⃣ Performance Benchmarks Table
-markdown## Performance Benchmarks
+- 시스템 구조 한눈에 파악
+- 컴포넌트 간 관계 명확
+- 텍스트 기반으로 GitHub에서 바로 표시
+
+**5️⃣ Performance Benchmarks Table**
+
+```markdown
+## Performance Benchmarks
 
 | Metric | Target | Actual | Status |
 |--------|--------|--------|--------|
@@ -123,15 +151,19 @@ markdown## Performance Benchmarks
 | Profile service (100 matches) | ≤ 5 ms | **< 1 ms** | ✅ |
 
 **Test Environment**: Ubuntu 22.04, 4-8 vCPUs, CMake Release build
-효과:
+```
 
-KPI 달성 증명
-정량적 성능 표현 (채용 담당자가 선호)
-타겟 대비 실제 수치 비교
+**효과**:
 
-6️⃣ Quick Start 확장 (5단계 → 실행까지)
+- KPI 달성 증명
+- 정량적 성능 표현 (채용 담당자가 선호)
+- 타겟 대비 실제 수치 비교
+
+**6️⃣ Quick Start 확장 (5단계 → 실행까지)**
+
 Before:
-bash# Start infrastructure
+```bash
+# Start infrastructure
 cd deployments/docker
 docker-compose up -d
 
@@ -143,22 +175,29 @@ make
 
 # Run tests
 ctest
+```
+
 After:
-markdown### 1. Install Dependencies (vcpkg)
-### 2. Start Infrastructure  
+```markdown
+### 1. Install Dependencies (vcpkg)
+### 2. Start Infrastructure
 ### 3. Build Server
 ### 4. Run Tests
 ### 5. Run Server
 
 # 각 단계마다 상세한 명령어와 설명 포함
-효과:
+```
 
-단계별 명확한 가이드
-예상 출력 포함 (사용자가 성공 여부 확인 가능)
-vcpkg 설정 명시
+**효과**:
 
-7️⃣ Testing the Server (프로토콜 문서화)
-markdown## Testing the Server
+- 단계별 명확한 가이드
+- 예상 출력 포함 (사용자가 성공 여부 확인 가능)
+- vcpkg 설정 명시
+
+**7️⃣ Testing the Server (프로토콜 문서화)**
+
+```markdown
+## Testing the Server
 
 ### WebSocket Protocol (Port 8080)
 
@@ -174,14 +213,18 @@ input player1 0 1 0 0 0 150.5 200.0
 
 ### Option 1: wscat (Quick Test)
 ### Option 2: Python Test Client (Automated)
-효과:
+```
 
-프로토콜 명세 문서화
-두 가지 테스트 방법 제공 (수동/자동)
-구체적 예제로 학습 용이
+**효과**:
 
-8️⃣ HTTP API Documentation
-markdown### HTTP API (Port 8081)
+- 프로토콜 명세 문서화
+- 두 가지 테스트 방법 제공 (수동/자동)
+- 구체적 예제로 학습 용이
+
+**8️⃣ HTTP API Documentation**
+
+```markdown
+### HTTP API (Port 8081)
 
 **Get Player Profile**:
 ```bash
@@ -197,14 +240,18 @@ Response:
   ...
 }
 ```
-효과:
+```
 
-REST API 문서화
-curl 명령어로 즉시 테스트 가능
-응답 예제로 JSON 구조 파악
+**효과**:
 
-9️⃣ Monitoring (Prometheus + Grafana)
-markdown## Monitoring
+- REST API 문서화
+- curl 명령어로 즉시 테스트 가능
+- 응답 예제로 JSON 구조 파악
+
+**9️⃣ Monitoring (Prometheus + Grafana)**
+
+```markdown
+## Monitoring
 
 ### Prometheus Metrics
 
@@ -219,14 +266,18 @@ markdown## Monitoring
 ### Grafana Dashboard
 
 Access at `http://localhost:3000`
-효과:
+```
 
-운영 가능한 수준의 모니터링
-메트릭 목록으로 관찰 가능 지표 명확
-실무 경험 강조
+**효과**:
 
-🔟 Troubleshooting Section
-markdown## Troubleshooting
+- 운영 가능한 수준의 모니터링
+- 메트릭 목록으로 관찰 가능 지표 명확
+- 실무 경험 강조
+
+**🔟 Troubleshooting Section**
+
+```markdown
+## Troubleshooting
 
 ### Build Errors
 
@@ -243,21 +294,39 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
 # Check PostgreSQL is running
 docker ps | grep postgres
 ```
-효과:
+```
 
-흔한 문제 선제 해결
-사용자 경험 개선
-지원 요청 감소
+**효과**:
 
+- 흔한 문제 선제 해결
+- 사용자 경험 개선
+- 지원 요청 감소
 
-📌 작업 #2: Python Test Client 구현
-문제: wscat은 수동 테스트만 가능, 스트레스 테스트 및 자동화 불가
-해결책: tools/test_client.py - 자동화된 WebSocket 클라이언트
-설계 결정
-측면결정이유언어Python 3.7+간단, 크로스 플랫폼, asyncio 지원라이브러리websockets표준, 비동기, 간결한 API프로토콜Text frames서버가 text 사용, 디버깅 용이입력 시뮬레이션랜덤 + 30% 확률실제 플레이어 행동 근사입력 주기16ms (60 FPS)클라이언트 표준 입력 레이트CLIargparse표준 라이브러리, 확장 가능
-핵심 구현
-1️⃣ Arena60Client 클래스
-pythonclass Arena60Client:
+---
+
+### 📌 작업 #2: Python Test Client 구현
+
+**문제**: wscat은 수동 테스트만 가능, 스트레스 테스트 및 자동화 불가
+
+**해결책**: tools/test_client.py - 자동화된 WebSocket 클라이언트
+
+**설계 결정**
+
+| 측면 | 결정 | 이유 |
+|------|------|------|
+| 언어 | Python 3.7+ | 간단, 크로스 플랫폼, asyncio 지원 |
+| 라이브러리 | websockets | 표준, 비동기, 간결한 API |
+| 프로토콜 | Text frames | 서버가 text 사용, 디버깅 용이 |
+| 입력 시뮬레이션 | 랜덤 + 30% 확률 | 실제 플레이어 행동 근사 |
+| 입력 주기 | 16ms (60 FPS) | 클라이언트 표준 입력 레이트 |
+| CLI | argparse | 표준 라이브러리, 확장 가능 |
+
+**핵심 구현**
+
+**1️⃣ Arena60Client 클래스**
+
+```python
+class Arena60Client:
     """WebSocket client for Arena60 game server."""
     
     def __init__(self, player_id: str, host: str = "localhost", port: int = 8080):
@@ -400,48 +469,70 @@ All 10 clients finished
 서버 tick rate 안정성 (부하 하 60 TPS 유지?)
 메모리 누수 (장시간 실행)
 
-시나리오 3: 전투 시뮬레이션
-bash# 터미널 1
+**시나리오 3**: 전투 시뮬레이션
+
+```bash
+# 터미널 1
 python tools/test_client.py --player attacker --duration 20
 
 # 터미널 2
 python tools/test_client.py --player defender --duration 20
+```
+
 검증 항목:
+- 2 플레이어 전투
+- Death event 발생
+- 매치 통계 수집
 
-2 플레이어 전투
-Death event 발생
-매치 통계 수집
+**시나리오 4**: 원격 서버 테스트
 
-시나리오 4: 원격 서버 테스트
-bashpython tools/test_client.py --host 192.168.1.100 --port 9000 --duration 60
+```bash
+python tools/test_client.py --host 192.168.1.100 --port 9000 --duration 60
+```
+
 검증 항목:
+- 네트워크 지연
+- 원격 배포 환경 테스트
 
-네트워크 지연
-원격 배포 환경 테스트
+---
 
+### 📌 작업 #3: tools/README.md (상세 사용 가이드)
 
-📌 작업 #3: tools/README.md (상세 사용 가이드)
-목적: test_client.py 완전한 매뉴얼 제공
-주요 섹션
-1️⃣ Features (강조)
-markdown### Features
+**목적**: test_client.py 완전한 매뉴얼 제공
+
+**주요 섹션**
+
+**1️⃣ Features (강조)**
+
+```markdown
+### Features
 
 - **Automated gameplay simulation** - Sends random movement and fire inputs
 - **Multiple concurrent clients** - Stress test with multiple players
 - **Real-time output** - Displays sent/received messages
 - **Configurable** - Customize host, port, player ID, duration
+```
+
 효과: 기능 한눈에 파악
-2️⃣ Command-Line Options Table
-markdown| Option | Default | Description |
+
+**2️⃣ Command-Line Options Table**
+
+```markdown
+| Option | Default | Description |
 |--------|---------|-------------|
 | `--host` | `localhost` | Server hostname or IP |
 | `--port` | `8080` | WebSocket port |
 | `--player` | `player1` | Player ID |
 | `--clients` | `1` | Number of concurrent clients |
 | `--duration` | `5.0` | Test duration in seconds |
+```
+
 효과: 옵션을 표로 정리 (가독성)
-3️⃣ Input Simulation 설명
-markdown### Input Simulation
+
+**3️⃣ Input Simulation 설명**
+
+```markdown
+### Input Simulation
 
 The test client simulates realistic player behavior:
 
@@ -456,45 +547,67 @@ The test client simulates realistic player behavior:
 **Input Rate**:
 - ~60 inputs per second (16ms interval)
 - Matches typical game client behavior
+```
+
 효과: 시뮬레이션 로직 투명하게 공개
-4️⃣ Error Handling
-markdown### Error Handling
+
+**4️⃣ Error Handling**
+
+```markdown
+### Error Handling
 
 **Connection refused**:
-```
+```text
 [player1] Connection refused. Is the server running?
 ```
 
 → Check if server is running: `docker ps` or `./arena60_server`
+```
+
 효과: 에러 메시지 → 해결 방법 매핑
-5️⃣ Use Cases (실전 예제)
-markdown### Use Cases
+
+**5️⃣ Use Cases (실전 예제)**
+
+```markdown
+### Use Cases
 
 **1. Smoke Test**
 **2. Movement Test**
 **3. Combat Test**
 **4. Load Test**
 **5. Endurance Test**
+```
+
 효과: 상황별 사용법 제시
-6️⃣ Interpreting Output (출력 해석)
-markdown### Interpreting Output
+
+**6️⃣ Interpreting Output (출력 해석)**
+
+```markdown
+### Interpreting Output
 
 **Normal operation**:
-```
+```text
 [player1] -> input player1 0 1 0 0 0 150.5 200.3
 [player1] <- state player1 105.0 200.0 0.0 61
 ```
+
 → Server responding normally, player position updating
 
 **No response**:
-```
+```text
 [player1] -> input player1 0 1 0 0 0 150.5 200.3
 (no state received)
 ```
+
 → Check server logs, possible crash or deadlock
+```
+
 효과: 출력을 보고 문제 진단 가능
-7️⃣ CI/CD Integration
-yaml# GitHub Actions example
+
+**7️⃣ CI/CD Integration**
+
+```yaml
+# GitHub Actions example
 - name: Test game server
   run: |
     ./arena60_server &
@@ -503,9 +616,12 @@ yaml# GitHub Actions example
     killall arena60_server
 효과: 자동화 파이프라인에 통합 가능
 
-📝 완성 작업 순서
-Phase 1: README.md 개선
-bash# ========================================
+## 📝 완성 작업 순서
+
+### Phase 1: README.md 개선
+
+```bash
+# ========================================
 # Step 1: 프로젝트 정체성 강화
 # ========================================
 cat > README.md << 'EOF'
@@ -950,9 +1066,12 @@ cat >> README.md << 'EOF'
 **Target**: Korean Game Server Developer positions
 **Checkpoint A**: Complete (MVP 1.0-1.3)
 EOF
+```
 
-Phase 2: Python Test Client 구현
-bash# ========================================
+### Phase 2: Python Test Client 구현
+
+```bash
+# ========================================
 # Step 15: test_client.py 뼈대
 # ========================================
 cat > tools/test_client.py << 'EOF'
@@ -1137,9 +1256,12 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+```
 
-Phase 3: tools/README.md 작성
-bash# ========================================
+### Phase 3: tools/README.md 작성
+
+```bash
+# ========================================
 # Step 21: tools/README.md
 # ========================================
 cat > tools/README.md << 'EOF'
@@ -1349,10 +1471,14 @@ Planned utilities:
 - `test_http.py` - Test HTTP endpoints
 - `benchmark.py` - Automated benchmarking
 EOF
+```
 
-🔧 실행 및 검증
-Step 1: 테스트 클라이언트 설치 및 실행
-bash# ========================================
+## 🔧 실행 및 검증
+
+### Step 1: 테스트 클라이언트 설치 및 실행
+
+```bash
+# ========================================
 # 1단계: 의존성 설치
 # ========================================
 pip install websockets
@@ -1462,73 +1588,88 @@ curl http://localhost:8081/leaderboard?limit=2
 curl http://localhost:8081/metrics | grep -E "(game_tick_rate|player_profiles_total)"
 # game_tick_rate 60.0
 # player_profiles_total 2
+```
 
-📊 최종 검증 체크리스트
-✅ README.md 개선
+## 📊 최종 검증 체크리스트
 
- 프로젝트 정체성 명확화 (포트폴리오 목적)
- Status 섹션 (Checkpoint A 완료 표시)
- Feature list (MVP별 분류)
- Architecture diagram (ASCII art)
- Performance benchmarks table
- Quick Start 5단계 확장
- WebSocket 프로토콜 문서화
- HTTP API 예제
- Monitoring 가이드
- Testing 가이드
- Troubleshooting 섹션
- Tech Stack 근거
- Next Steps (Checkpoint B)
+### ✅ README.md 개선
 
-✅ test_client.py 구현
+- 프로젝트 정체성 명확화 (포트폴리오 목적)
+- Status 섹션 (Checkpoint A 완료 표시)
+- Feature list (MVP별 분류)
+- Architecture diagram (ASCII art)
+- Performance benchmarks table
+- Quick Start 5단계 확장
+- WebSocket 프로토콜 문서화
+- HTTP API 예제
+- Monitoring 가이드
+- Testing 가이드
+- Troubleshooting 섹션
+- Tech Stack 근거
+- Next Steps (Checkpoint B)
 
- Arena60Client 클래스
- 비동기 WebSocket 연결
- 게임플레이 시뮬레이션 (랜덤 입력)
- 단일/다중 클라이언트 지원
- CLI 인터페이스 (argparse)
- 에러 핸들링
- 실시간 출력 (송신/수신 메시지)
- 통계 출력 (총 입력 수)
+### ✅ test_client.py 구현
 
-✅ tools/README.md 작성
+- Arena60Client 클래스
+- 비동기 WebSocket 연결
+- 게임플레이 시뮬레이션 (랜덤 입력)
+- 단일/다중 클라이언트 지원
+- CLI 인터페이스 (argparse)
+- 에러 핸들링
+- 실시간 출력 (송신/수신 메시지)
+- 통계 출력 (총 입력 수)
 
- 기능 설명
- 설치 가이드
- 기본 사용법
- CLI 옵션 테이블
- 예제 (단일/다중/전투/스트레스)
- 입력 시뮬레이션 설명
- 프로토콜 문서화
- 에러 핸들링
- 사용 사례
- 출력 해석 가이드
- CI/CD 통합 예제
- wscat 대안 설명
+### ✅ tools/README.md 작성
 
-✅ 통합 검증
+- 기능 설명
+- 설치 가이드
+- 기본 사용법
+- CLI 옵션 테이블
+- 예제 (단일/다중/전투/스트레스)
+- 입력 시뮬레이션 설명
+- 프로토콜 문서화
+- 에러 핸들링
+- 사용 사례
+- 출력 해석 가이드
+- CI/CD 통합 예제
+- wscat 대안 설명
 
- test_client.py 실행 가능
- 단일 클라이언트 정상 동작
- 10 클라이언트 스트레스 테스트 통과
- 전투 시뮬레이션 (2 플레이어)
- Death event 정상 수신
- HTTP API 정상 동작
- Prometheus 메트릭 정상
+### ✅ 통합 검증
 
+- test_client.py 실행 가능
+- 단일 클라이언트 정상 동작
+- 10 클라이언트 스트레스 테스트 통과
+- 전투 시뮬레이션 (2 플레이어)
+- Death event 정상 수신
+- HTTP API 정상 동작
+- Prometheus 메트릭 정상
 
-🎓 핵심 교훈 (Documentation & Testing)
+---
 
-README는 프로젝트의 얼굴 - 첫인상이 전부, 5분 안에 파악 가능해야
-ASCII 다이어그램은 강력 - 텍스트 기반이지만 시각적 효과
-성능 수치는 신뢰 구축 - 정량적 증거 (0.04ms, 18.3ms)
-Quick Start는 단계별 - 1→2→3→4→5, 각 단계 검증 가능
-테스트 도구는 자동화 - wscat < Python client (반복 가능)
-프로토콜 문서화 필수 - 누구나 클라이언트 작성 가능
-에러 메시지 → 해결책 - Troubleshooting 섹션으로 지원 부담 감소
-CI/CD 통합 예제 - 엔터프라이즈 수준 인상
+## 🎓 핵심 교훈 (Documentation & Testing)
 
+- README는 프로젝트의 얼굴 - 첫인상이 전부, 5분 안에 파악 가능해야
+- ASCII 다이어그램은 강력 - 텍스트 기반이지만 시각적 효과
+- 성능 수치는 신뢰 구축 - 정량적 증거 (0.04ms, 18.3ms)
+- Quick Start는 단계별 - 1→2→3→4→5, 각 단계 검증 가능
+- 테스트 도구는 자동화 - wscat < Python client (반복 가능)
+- 프로토콜 문서화 필수 - 누구나 클라이언트 작성 가능
+- 에러 메시지 → 해결책 - Troubleshooting 섹션으로 지원 부담 감소
+- CI/CD 통합 예제 - 엔터프라이즈 수준 인상
 
-🔄 변경 요약
-영역BeforeAfter효과README 길이33줄544줄16배 확장, 완전한 문서Quick Start3 단계5 단계실행까지 명확한 가이드테스트 방법wscat만wscat + Python자동화 가능프로토콜없음완전 문서화클라이언트 개발 가능아키텍처없음ASCII 다이어그램시각적 이해성능 증명없음벤치마크 테이블정량적 증거모니터링없음Prometheus 가이드운영 레디트러블슈팅없음6개 시나리오지원 부담 감소
-완성도: Checkpoint A는 이제 포트폴리오 제출 가능 수준! 🚀
+---
+
+## 🔄 변경 요약
+
+| 영역 | Before | After | 효과 |
+|------|--------|-------|------|
+| README 길이 | 33줄 | 544줄 | 16배 확장, 완전한 문서 |
+| Quick Start | 3 단계 | 5 단계 | 실행까지 명확한 가이드 |
+| 테스트 방법 | wscat만 | wscat + Python | 자동화 가능 |
+| 프로토콜 | 없음 | 완전 문서화 | 클라이언트 개발 가능 |
+| 아키텍처 | 없음 | ASCII 다이어그램 | 시각적 이해 |
+| 성능 증명 | 없음 | 벤치마크 테이블 | 정량적 증거 |
+| 모니터링 | 없음 | Prometheus 가이드 | 운영 레디 |
+| 트러블슈팅 | 없음 | 6개 시나리오 | 지원 부담 감소 |
+
+**완성도: Checkpoint A는 이제 포트폴리오 제출 가능 수준! 🚀**

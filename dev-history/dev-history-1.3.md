@@ -1,22 +1,40 @@
-Arena60 MVP 1.3 - Statistics & Ranking 완벽한 개발 순서
-📋 MVP 1.3 개요
-🎯 목표
+# Arena60 MVP 1.3 - Statistics & Ranking 완벽한 개발 순서
+
+## 📋 MVP 1.3 개요
+
+### 🎯 목표
+
 매치 후 통계 수집 및 ELO 기반 랭킹 시스템 - K=25 레이팅, HTTP API, 100 matches < 5ms
-📊 변경 규모
 
-파일 추가: 17개 (소스 9 + 테스트 8)
-파일 수정: 5개 (main.cpp, websocket_server, metrics_http_server, CI, CMakeLists.txt)
-총 라인 수: ~1200줄 추가
+### 📊 변경 규모
 
+- 파일 추가: 17개 (소스 9 + 테스트 8)
+- 파일 수정: 5개 (main.cpp, websocket_server, metrics_http_server, CI, CMakeLists.txt)
+- 총 라인 수: ~1200줄 추가
 
-🔍 선택의 순간들 (Decision Points)
-📌 선택 #1: ELO K-factor
-문제: 레이팅 변동 폭을 얼마로 설정할 것인가?
-후보 및 시뮬레이션:
-K-factor승리 시 변화특성적용 대상16±8~16안정적, 느린 수렴Chess masters (FIDE 2400+)25 ✅±13~25균형, 적정 수렴일반 플레이어32±16~32빠른 변동신규 플레이어 (첫 30 게임)40±20~40매우 불안정부트스트랩 단계
-최종 선택: K = 25
-선택 근거:
-cpp// 시뮬레이션: 1200 vs 1200 (동등한 실력)
+---
+
+## 🔍 선택의 순간들 (Decision Points)
+
+### 📌 선택 #1: ELO K-factor
+
+**문제**: 레이팅 변동 폭을 얼마로 설정할 것인가?
+
+**후보 및 시뮬레이션**:
+
+| K-factor | 승리 시 변화 | 특성 | 적용 대상 |
+|----------|-------------|------|-----------|
+| 16 | ±8~16 | 안정적, 느린 수렴 | Chess masters (FIDE 2400+) |
+| **25** ✅ | ±13~25 | 균형, 적정 수렴 | 일반 플레이어 |
+| 32 | ±16~32 | 빠른 변동 | 신규 플레이어 (첫 30 게임) |
+| 40 | ±20~40 | 매우 불안정 | 부트스트랩 단계 |
+
+**최종 선택**: K = 25
+
+**선택 근거**:
+
+```cpp
+// 시뮬레이션: 1200 vs 1200 (동등한 실력)
 Expected score = 0.5 (50% 승률 예상)
 Actual result = 1.0 (승리)
 
@@ -39,67 +57,78 @@ Rating change = 25 × (1.0 - 0.24)
 Expected score (for 1400) = 0.76 (76% 승률)
 Rating change = 25 × (1.0 - 0.76)
              = 6 points  // 작은 보상
-K=25 장점:
+```
 
-20-30 게임으로 실력 구간 수렴 (K=16은 50+게임 필요)
-Upset 시 적절한 보상 (19 points)
-Expected win 시 과도한 변동 방지 (6 points)
-USCF (US Chess Federation) 표준
+**K=25 장점**:
 
-📌 선택 #2: Leaderboard 데이터 구조
-문제: 점수 정렬 + 동점 처리를 어떻게 구현할 것인가?
-후보:
+- 20-30 게임으로 실력 구간 수렴 (K=16은 50+게임 필요)
+- Upset 시 적절한 보상 (19 points)
+- Expected win 시 과도한 변동 방지 (6 points)
+- USCF (US Chess Federation) 표준
 
-std::vector + sort
+### 📌 선택 #2: Leaderboard 데이터 구조
 
-cpp   std::vector<pair<string, int>> players;
-   // TopN 호출마다 O(n log n) 정렬
+**문제**: 점수 정렬 + 동점 처리를 어떻게 구현할 것인가?
+
+**후보**:
+
+1. **std::vector + sort**
+
+```cpp
+std::vector<pair<string, int>> players;
+// TopN 호출마다 O(n log n) 정렬
+```
 
 문제: 매번 정렬, O(n log n)
 
+2. **std::priority_queue**
 
-std::priority_queue
-
-cpp   priority_queue<pair<int, string>> pq;
+```cpp
+priority_queue<pair<int, string>> pq;
+```
 
 문제: Remove 불가능, Update 어려움
 
+3. **✅ std::map<int, std::set<string>, std::greater>**
 
-✅ std::map<int, std::set<string>, std::greater>
-
-cpp   std::map<int, std::set<string>, std::greater<int>> ordered_;
-   std::unordered_map<string, int> scores_;
+```cpp
+std::map<int, std::set<string>, std::greater<int>> ordered_;
+std::unordered_map<string, int> scores_;
+```
 
 장점: 자동 정렬, O(log n) 업데이트, 동점 시 player_id 정렬
 
-최종 선택: Dual structure (map + unordered_map)
-구현:
-cppclass InMemoryLeaderboardStore {
+**최종 선택**: Dual structure (map + unordered_map)
+
+**구현**:
+
+```cpp
+class InMemoryLeaderboardStore {
 private:
     // 빠른 조회용
     std::unordered_map<std::string, int> scores_;  // player_id → score
-    
+
     // 정렬된 순서용 (내림차순)
     std::map<int, std::set<std::string>, std::greater<int>> ordered_;
     //      ↑     ↑                        ↑
     //    점수   동점자들                   큰 점수가 먼저
-    
+
     void Upsert(const std::string& player_id, int score) {
         // 1. 기존 점수 제거
         auto existing = scores_.find(player_id);
         if (existing != scores_.end()) {
             RemoveFromOrdered(player_id, existing->second);
         }
-        
+
         // 2. 새 점수 삽입
         scores_[player_id] = score;
         ordered_[score].insert(player_id);  // std::set이 player_id 정렬
     }
-    
+
     std::vector<pair<string, int>> TopN(size_t limit) const {
         std::vector<pair<string, int>> result;
         size_t remaining = limit;
-        
+
         for (const auto& [score, players] : ordered_) {  // 점수 내림차순
             for (const auto& player : players) {         // player_id 오름차순
                 if (remaining == 0) return result;
@@ -119,7 +148,7 @@ private:
 - Get: O(1)
 
 **정렬 보장**:
-```
+```text
 ordered_ = {
     1400: {"alice", "bob"},     // 동점 → player_id 오름차순
     1300: {"charlie"},
@@ -133,20 +162,33 @@ TopN(5) → [
     ("dave", 1200),
     ("eve", 1200)       // dave < eve
 ]
-📌 선택 #3: JSON 직렬화 방식
-문제: JSON 출력을 어떻게 생성할 것인가?
-후보:
-방식장점단점의존성nlohmann/json편리, 타입 안전헤더 크기 큰 편1개 헤더 파일RapidJSON매우 빠름복잡한 APIvcpkg 설치 필요boost::property_treeBoost 기존 사용 중JSON 지원 제한적이미 있음수동 구현 ✅의존성 없음, 완전 제어에러 핸들링 수동없음
-최종 선택: Manual JSON (std::ostringstream)
-선택 근거:
+```
+### 📌 선택 #3: JSON 직렬화 방식
 
-MVP 단계에서 복잡한 JSON 불필요
-출력 포맷 완전 제어
-빌드 시간 증가 없음
-키 순서 보장 (테스트 용이)
+**문제**: JSON 출력을 어떻게 생성할 것인가?
 
-구현:
-cppstd::string SerializeProfile(const PlayerProfile& profile) const {
+**후보**:
+
+| 방식 | 장점 | 단점 | 의존성 |
+|------|------|------|--------|
+| nlohmann/json | 편리, 타입 안전 | 헤더 크기 큰 편 | 1개 헤더 파일 |
+| RapidJSON | 매우 빠름 | 복잡한 API | vcpkg 설치 필요 |
+| boost::property_tree | Boost 기존 사용 중 | JSON 지원 제한적 | 이미 있음 |
+| **수동 구현** ✅ | 의존성 없음, 완전 제어 | 에러 핸들링 수동 | 없음 |
+
+**최종 선택**: Manual JSON (std::ostringstream)
+
+**선택 근거**:
+
+- MVP 단계에서 복잡한 JSON 불필요
+- 출력 포맷 완전 제어
+- 빌드 시간 증가 없음
+- 키 순서 보장 (테스트 용이)
+
+**구현**:
+
+```cpp
+std::string SerializeProfile(const PlayerProfile& profile) const {
     std::ostringstream oss;
     oss << "{";
     oss << "\"player_id\":\"" << profile.player_id << "\",";
@@ -160,53 +202,59 @@ cppstd::string SerializeProfile(const PlayerProfile& profile) const {
     oss << "\"hits_landed\":" << profile.hits_landed << ",";
     oss << "\"damage_dealt\":" << profile.damage_dealt << ",";
     oss << "\"damage_taken\":" << profile.damage_taken << ",";
-    oss << "\"accuracy\":" << std::fixed << std::setprecision(4) 
+    oss << "\"accuracy\":" << std::fixed << std::setprecision(4)
         << profile.Accuracy();
     oss << "}";
     return oss.str();
 }
-장점:
+```
 
-키 순서 명시적 (alphabetical)
-Escaping 제어 가능
-성능 예측 가능
-디버깅 쉬움
+**장점**:
 
-트레이드오프: nlohmann/json은 나중에 필요 시 추가 (Checkpoint B+)
-📌 선택 #4: HTTP 라우팅 아키텍처
-문제: /metrics, /profiles/<id>, /leaderboard 를 어떻게 라우팅할 것인가?
-후보:
+- 키 순서 명시적 (alphabetical)
+- Escaping 제어 가능
+- 성능 예측 가능
+- 디버깅 쉬움
 
-단일 함수 (if-else chain)
+**트레이드오프**: nlohmann/json은 나중에 필요 시 추가 (Checkpoint B+)
+### 📌 선택 #4: HTTP 라우팅 아키텍처
 
-cpp   if (target == "/metrics") { ... }
-   else if (target.starts_with("/profiles/")) { ... }
-   else if (target.starts_with("/leaderboard")) { ... }
+**문제**: /metrics, /profiles/<id>, /leaderboard 를 어떻게 라우팅할 것인가?
+
+**후보**:
+
+1. **단일 함수 (if-else chain)**
+
+```cpp
+if (target == "/metrics") { ... }
+else if (target.starts_with("/profiles/")) { ... }
+else if (target.starts_with("/leaderboard")) { ... }
+```
 
 문제: main.cpp에 라우팅 로직, 확장 어려움
 
-
-MetricsHttpServer에 직접 추가
+2. **MetricsHttpServer에 직접 추가**
 
 문제: SRP 위반, 테스트 어려움
 
+3. **✅ 별도 Router 클래스**
 
-✅ 별도 Router 클래스
-
-cpp   class ProfileHttpRouter {
-       http::response Handle(const http::request&);
-   private:
-       http::response HandleMetrics(...);
-       http::response HandleProfile(..., player_id);
-       http::response HandleLeaderboard(..., limit);
-   };
+```cpp
+class ProfileHttpRouter {
+    http::response Handle(const http::request&);
+private:
+    http::response HandleMetrics(...);
+    http::response HandleProfile(..., player_id);
+    http::response HandleLeaderboard(..., limit);
+};
 ```
-   - 장점: 관심사 분리, 테스트 용이, 확장 쉬움
+
+장점: 관심사 분리, 테스트 용이, 확장 쉬움
 
 **최종 선택**: ProfileHttpRouter (Strategy Pattern)
 
-**아키�ecture**:
-```
+**아키텍처**:
+```text
 ┌─────────────────────────────────────────┐
 │      MetricsHttpServer                  │
 │  (Generic HTTP acceptor/session)        │
@@ -229,42 +277,59 @@ cpp   class ProfileHttpRouter {
 │   PlayerProfileService                  │
 │  (Business logic)                       │
 └─────────────────────────────────────────┘
-확장성:
-cpp// main.cpp - 와이어링
+```
+
+**확장성**:
+
+```cpp
+// main.cpp - 와이어링
 auto router = std::make_shared<ProfileHttpRouter>(metrics_provider, profile_service);
-MetricsHttpServer::RequestHandler http_handler = 
+MetricsHttpServer::RequestHandler http_handler =
     [router](const auto& request) {
         return router->Handle(request);
     };
 auto server = std::make_shared<MetricsHttpServer>(io_context, port, http_handler);
-장점:
+```
 
-Router 교체 가능 (예: V2Router)
-단위 테스트 가능 (router만 테스트)
-메트릭 서버는 generic transport로 유지
+**장점**:
 
-📌 선택 #5: 통계 수집 시점
-문제: 전투 통계를 언제 수집할 것인가?
-후보:
-시점방식장점단점매 틱모든 틱마다 통계 업데이트실시간 정확도CPU 낭비, 락 경합Death event 시 ✅사망 발생 시 한 번 수집효율적, 간단매치 종료 시점만주기적 (5초마다)타이머로 배치 처리부하 분산복잡도 증가
-최종 선택: Death Event Triggered (on-demand)
-구현:
-cpp// WebSocketServer::BroadcastState()
+- Router 교체 가능 (예: V2Router)
+- 단위 테스트 가능 (router만 테스트)
+- 메트릭 서버는 generic transport로 유지
+
+### 📌 선택 #5: 통계 수집 시점
+
+**문제**: 전투 통계를 언제 수집할 것인가?
+
+**후보**:
+
+| 시점 | 방식 | 장점 | 단점 |
+|------|------|------|------|
+| 매 틱 | 모든 틱마다 통계 업데이트 | 실시간 정확도 | CPU 낭비, 락 경합 |
+| **Death event 시** ✅ | 사망 발생 시 한 번 수집 | 효율적, 간단 | 매치 종료 시점만 |
+| 주기적 (5초마다) | 타이머로 배치 처리 | 부하 분산 | 복잡도 증가 |
+
+**최종 선택**: Death Event Triggered (on-demand)
+
+**구현**:
+
+```cpp
+// WebSocketServer::BroadcastState()
 void BroadcastState(uint64_t tick, double delta) {
     session_.Tick(tick, delta);
     auto death_events = session_.ConsumeDeathEvents();
-    
+
     std::vector<MatchResult> completed_matches;
-    
+
     for (const auto& event : death_events) {
         if (event.type != CombatEventType::Death) continue;
-        
+
         // 🆕 매치 통계 수집 (1회만)
         completed_matches.push_back(
             match_stats_collector_.Collect(event, session_, now())
         );
     }
-    
+
     // 🆕 락 해제 후 프로필 업데이트
     for (const auto& match : completed_matches) {
         match_completed_callback_(match);  // → PlayerProfileService::RecordMatch
@@ -278,7 +343,7 @@ void BroadcastState(uint64_t tick, double delta) {
 3. 통계 일관성 보장 (tick에서 원자적)
 
 **데이터 흐름**:
-```
+```text
 GameSession::Tick
     → Death detected
     → pending_deaths_.push_back(event)
@@ -310,15 +375,19 @@ PlayerProfileService::RecordMatch
 **최종 선택**: 1200 (Chess Standard)
 
 **선택 근거**:
-```
+```text
 ELO 분포 (정규분포 가정):
 1000: 10th percentile (하위 10%)
 1200: 30th percentile (중하위) ✅ 안전한 시작점
 1500: 50th percentile (정중앙)
 1800: 70th percentile (중상위)
 2000: 85th percentile (상위 15%)
+
 K=25와의 궁합:
-cpp// 신규 플레이어 (1200) vs 평균 플레이어 (1500)
+```
+
+```cpp
+// 신규 플레이어 (1200) vs 평균 플레이어 (1500)
 // 신규가 이기면?
 Expected = 1 / (1 + 10^((1500-1200)/400))
          = 1 / (1 + 10^0.75)
@@ -331,8 +400,12 @@ New rating = 1200 + 21 = 1221
 10 wins vs 1200: +13 each → +130
 10 losses vs 1200: -13 each → -130
 Final: 1200 (수렴)
-구현:
-cppstruct AggregateStats {
+```
+
+**구현**:
+
+```cpp
+struct AggregateStats {
     int rating{1200};  // 🆕 초기값
     // ... 기타 필드는 0
 };
@@ -340,13 +413,17 @@ cppstruct AggregateStats {
 void RecordMatch(const MatchResult& result) {
     auto& winner = aggregates_[result.winner_id()];  // 없으면 생성
     auto& loser = aggregates_[result.loser_id()];
-    
+
     // winner, loser 모두 rating=1200으로 시작됨
 }
+```
 
-📝 완벽한 개발 순서
-Phase 1: 도메인 모델 (통계 Value Objects)
-bash# ========================================
+## 📝 완벽한 개발 순서
+
+### Phase 1: 도메인 모델 (통계 Value Objects)
+
+```bash
+# ========================================
 # Step 1: 프로젝트 메타 업데이트
 # ========================================
 cat > .meta/state.yml << 'EOF'
@@ -1610,9 +1687,12 @@ matches_recorded_total 3
 # TYPE rating_updates_total counter
 rating_updates_total 6
 EOF
+```
 
-🔧 실행 명령어 (전체 흐름)
-bash# ========================================
+## 🔧 실행 명령어 (전체 흐름)
+
+```bash
+# ========================================
 # 1단계: 빌드 및 테스트
 # ========================================
 cd server
@@ -1826,49 +1906,65 @@ Decision rationale:
 - Death-triggered: 1 collection per match vs per-tick waste
 
 Closes #4"
+```
 
-📊 최종 검증 체크리스트
-✅ 기능 검증
+## 📊 최종 검증 체크리스트
 
- 매치 통계 수집 (shots, hits, damage, kills, deaths)
- ELO 레이팅 (K=25, 1200 시작)
- 누적 통계 (wins, losses, 정확도)
- Leaderboard 정렬 (점수 내림차순, 동점 시 player_id)
- HTTP API 3개 엔드포인트
- JSON 직렬화 (alphabetical keys)
+### ✅ 기능 검증
 
-✅ 성능 검증
+- 매치 통계 수집 (shots, hits, damage, kills, deaths)
+- ELO 레이팅 (K=25, 1200 시작)
+- 누적 통계 (wins, losses, 정확도)
+- Leaderboard 정렬 (점수 내림차순, 동점 시 player_id)
+- HTTP API 3개 엔드포인트
+- JSON 직렬화 (alphabetical keys)
 
- 100 matches: 0.8 ms < 5 ms ✅
- O(log n) leaderboard update
- O(1) profile lookup
+### ✅ 성능 검증
 
-✅ 테스트 커버리지
+- 100 matches: 0.8 ms < 5 ms ✅
+- O(log n) leaderboard update
+- O(1) profile lookup
 
- 유닛 테스트: 12개
- 통합 테스트: 4개
- 성능 테스트: 1개
- 커버리지: 83.7% > 70% ✅
+### ✅ 테스트 커버리지
 
-✅ Redis 준비
+- 유닛 테스트: 12개
+- 통합 테스트: 4개
+- 성능 테스트: 1개
+- 커버리지: 83.7% > 70% ✅
 
- RedisLeaderboardStore stub
- 명령 로깅 (ZADD, ZREM, ZREVRANGE)
- InMemory fallback
- 인터페이스 분리
+### ✅ Redis 준비
 
+- RedisLeaderboardStore stub
+- 명령 로깅 (ZADD, ZREM, ZREVRANGE)
+- InMemory fallback
+- 인터페이스 분리
 
-🎓 핵심 교훈 (MVP 1.3)
+---
 
-K=25는 골디락스 영역 - 빠른 수렴 + 안정성
-1200은 안전한 시작점 - Chess 표준, 하향 조정 가능
-Dual Structure는 정렬의 왕도 - map + unordered_map
-수동 JSON은 충분히 좋음 - 의존성 < 편의성
-Router는 확장성의 기초 - SRP, 테스트 용이
-Death-triggered는 효율 - 매 틱 vs 매치당 1회
-Alphabetical JSON은 테스트 친화적 - 순서 보장
+## 🎓 핵심 교훈 (MVP 1.3)
 
+- K=25는 골디락스 영역 - 빠른 수렴 + 안정성
+- 1200은 안전한 시작점 - Chess 표준, 하향 조정 가능
+- Dual Structure는 정렬의 왕도 - map + unordered_map
+- 수동 JSON은 충분히 좋음 - 의존성 < 편의성
+- Router는 확장성의 기초 - SRP, 테스트 용이
+- Death-triggered는 효율 - 매 틱 vs 매치당 1회
+- Alphabetical JSON은 테스트 친화적 - 순서 보장
 
-🔄 MVP 1.2 → 1.3 변경 요약
-영역MVP 1.2MVP 1.3통계없음매치당 수집레이팅고정 (매칭용)ELO (K=25, 동적)LeaderboardN/ADual structure (정렬)HTTP API/metrics only+/profiles/<id>, /leaderboardJSONN/AManual serialization라우팅단순 함수ProfileHttpRouter (class)통계 수집N/ADeath event triggeredMetrics11개15개 (+4)성능 목표2 ms (매칭)5 ms (100 매치 기록)
-완벽한 재현 가능! 🚀
+---
+
+## 🔄 MVP 1.2 → 1.3 변경 요약
+
+| 영역 | MVP 1.2 | MVP 1.3 |
+|------|---------|---------|
+| 통계 | 없음 | 매치당 수집 |
+| 레이팅 | 고정 (매칭용) | ELO (K=25, 동적) |
+| Leaderboard | N/A | Dual structure (정렬) |
+| HTTP API | /metrics only | +/profiles/<id>, /leaderboard |
+| JSON | N/A | Manual serialization |
+| 라우팅 | 단순 함수 | ProfileHttpRouter (class) |
+| 통계 수집 | N/A | Death event triggered |
+| Metrics | 11개 | 15개 (+4) |
+| 성능 목표 | 2 ms (매칭) | 5 ms (100 매치 기록) |
+
+**완벽한 재현 가능! 🚀**

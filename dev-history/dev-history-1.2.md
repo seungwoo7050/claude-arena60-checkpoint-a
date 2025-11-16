@@ -1,15 +1,20 @@
-Arena60 MVP 1.2 - Matchmaking System 완벽한 개발 순서
-📋 MVP 1.2 개요
-🎯 목표
+# Arena60 MVP 1.2 - Matchmaking System 완벽한 개발 순서
+
+## 📋 MVP 1.2 개요
+
+### 🎯 목표
+
 ELO 기반 실시간 매치메이킹 시스템 - Redis 백엔드 큐, 동적 tolerance expansion, 200 players < 2ms
-📊 변경 규모
 
-파일 추가: 15개 (소스 10 + 테스트 5)
-파일 수정: 2개 (main.cpp, CMakeLists.txt)
-총 라인 수: ~950줄 추가
+### 📊 변경 규모
 
+- 파일 추가: 15개 (소스 10 + 테스트 5)
+- 파일 수정: 2개 (main.cpp, CMakeLists.txt)
+- 총 라인 수: ~950줄 추가
 
-🔍 선택의 순간들 (Decision Points)
+---
+
+## 🔍 선택의 순간들 (Decision Points)
 📌 선택 #1: Queue 구현 전략
 문제: Redis를 어떻게 통합할 것인가? (MVP 1.2는 Redis 미설치 환경에서도 빌드 가능해야 함)
 후보:
@@ -30,9 +35,11 @@ ELO 기반 실시간 매치메이킹 시스템 - Redis 백엔드 큐, 동적 tol
 
 
 
-최종 선택: Dual Implementation
-구현:
-cppclass MatchQueue {  // 인터페이스
+**최종 선택**: Dual Implementation
+
+**구현**:
+```cpp
+class MatchQueue {  // 인터페이스
 public:
     virtual void Upsert(const MatchRequest& request, std::uint64_t order) = 0;
     virtual bool Remove(const std::string& player_id) = 0;
@@ -49,20 +56,33 @@ class InMemoryMatchQueue : public MatchQueue {
 class RedisMatchQueue : public MatchQueue {
     InMemoryMatchQueue fallback_;  // 실제 동작
     std::ostream* stream_;         // Redis 명령 로깅
-    
+
     void Upsert(...) override {
         (*stream_) << "ZADD matchmaking_queue " << elo << ' ' << player_id;
         fallback_.Upsert(...);  // 실제로는 메모리에서 동작
     }
 };
-이유: MVP 1.2에서는 InMemory 사용, MVP 2.0+ (다중 서버)에서 Redis로 전환
-📌 선택 #2: Tolerance Expansion 알고리즘
-문제: 대기 시간에 따라 ELO 허용 범위를 어떻게 확대할 것인가?
-후보 및 계산:
-방식공식5초10초20초장점단점Linear ✅100 + ⌊t/5⌋×25±100±125±175예측 가능느린 확장Exponential100 × 1.2^⌊t/5⌋±120±144±207빠른 매칭불균형 매치Step100 (0-10s), 200 (10s+)±100±200±200단순급격한 변화
-최종 선택: Linear (base=100, step=25, interval=5s)
-선택 근거:
-cpp// ELO 1200 플레이어의 tolerance 변화
+```
+
+**이유**: MVP 1.2에서는 InMemory 사용, MVP 2.0+ (다중 서버)에서 Redis로 전환
+
+### 📌 선택 #2: Tolerance Expansion 알고리즘
+
+**문제**: 대기 시간에 따라 ELO 허용 범위를 어떻게 확대할 것인가?
+
+**후보 및 계산**:
+
+| 방식 | 공식 | 5초 | 10초 | 20초 | 장점 | 단점 |
+|------|------|-----|------|------|------|------|
+| **Linear** ✅ | 100 + ⌊t/5⌋×25 | ±100 | ±125 | ±175 | 예측 가능 | 느린 확장 |
+| Exponential | 100 × 1.2^⌊t/5⌋ | ±120 | ±144 | ±207 | 빠른 매칭 | 불균형 매치 |
+| Step | 100 (0-10s), 200 (10s+) | ±100 | ±200 | ±200 | 단순 | 급격한 변화 |
+
+**최종 선택**: Linear (base=100, step=25, interval=5s)
+
+**선택 근거**:
+```cpp
+// ELO 1200 플레이어의 tolerance 변화
 Wait Time | Tolerance Range | 설명
 ----------|-----------------|------
 0-5s      | 1100-1300       | 초기 품질 우선
@@ -77,30 +97,29 @@ int MatchRequest::CurrentTolerance(time_point now) const {
     const int increments = static_cast<int>(waited / 5.0);
     return 100 + increments * 25;  // 선형 증가
 }
-균형점: 10초 대기 시 ±125 ELO → 50점 차이까지 매치 가능
-📌 선택 #3: Queue 데이터 구조
-문제: ELO 정렬 + 삽입 순서 유지를 어떻게 구현할 것인가?
-후보:
+```
 
-std::multimap<int, string> (ELO → player_id)
+**균형점**: 10초 대기 시 ±125 ELO → 50점 차이까지 매치 가능
 
-문제: 같은 ELO 내 삽입 순서 보장 안 됨
+### 📌 선택 #3: Queue 데이터 구조
 
+**문제**: ELO 정렬 + 삽입 순서 유지를 어떻게 구현할 것인가?
 
-std::priority_queue (custom comparator)
+**후보**:
 
-문제: Remove 연산 O(n), 중간 삭제 불가
+**1. std::multimap<int, string> (ELO → player_id)**
+- 문제: 같은 ELO 내 삽입 순서 보장 안 됨
 
+**2. std::priority_queue (custom comparator)**
+- 문제: Remove 연산 O(n), 중간 삭제 불가
 
-✅ std::map<int, std::list> + index (Redis ZSET 모방)
+**3. ✅ std::map<int, std::list> + index (Redis ZSET 모방)**
+- 장점: ELO별 버킷, 리스트로 순서 유지, O(1) 삭제
 
-장점: ELO별 버킷, 리스트로 순서 유지, O(1) 삭제
+**최종 선택**: Bucketed List with Index
 
-
-
-최종 선택: Bucketed List with Index
-구현:
-cppclass InMemoryMatchQueue {
+**구현**:
+```cppclass InMemoryMatchQueue {
 private:
     struct BucketEntry {
         MatchRequest request;
@@ -147,19 +166,32 @@ private:
 - FetchOrdered: O(n)
 
 **Redis 대응**:
-```
+```text
 Redis ZSET                    InMemoryMatchQueue
 -----------                   ------------------
 ZADD queue 1200 alice     →   buckets_[1200].push_back(alice, order)
 ZREM queue alice          →   index_[alice] → iterator → erase
 ZRANGE queue 0 -1         →   FetchOrdered() → sort by (elo, order)
-📌 선택 #4: 매칭 알고리즘 (Pairing Strategy)
-문제: O(n²) 전체 비교를 피하면서 공정한 매칭을 어떻게 보장할 것인가?
-후보:
-방식복잡도장점단점Greedy (First-Fit) ✅O(n²) worst구현 단순, 결정론적완전 최적 아님Stable MarriageO(n² log n)완전 최적과도한 복잡도Bucket-basedO(n)빠름tolerance 변화 시 불공정
-최종 선택: Greedy First-Fit with Early Break
-알고리즘:
-cppstd::vector<Match> RunMatching(time_point now) {
+```
+
+---
+
+### 📌 선택 #4: 매칭 알고리즘 (Pairing Strategy)
+
+**문제**: O(n²) 전체 비교를 피하면서 공정한 매칭을 어떻게 보장할 것인가?
+
+**후보**:
+
+| 방식 | 복잡도 | 장점 | 단점 |
+|------|--------|------|------|
+| **Greedy (First-Fit)** ✅ | O(n²) worst | 구현 단순, 결정론적 | 완전 최적 아님 |
+| Stable Marriage | O(n² log n) | 완전 최적 | 과도한 복잡도 |
+| Bucket-based | O(n) | 빠름 | tolerance 변화 시 불공정 |
+
+**최종 선택**: Greedy First-Fit with Early Break
+
+**알고리즘**:
+```cppstd::vector<Match> RunMatching(time_point now) {
     auto ordered = queue_->FetchOrdered();  // ELO 오름차순
     std::unordered_set<std::string> used;
     std::vector<Match> matches;
@@ -203,17 +235,23 @@ cppstd::vector<Match> RunMatching(time_point now) {
 3. 양방향 tolerance 검사 (A→B, B→A 모두 확인)
 
 **성능**:
-```
+```text
 Best:  O(n) - 모두 인접 ELO
 Worst: O(n²) - 모두 다른 ELO, 200 players = 19,900 비교
 Average: O(n log n) - 실제 테스트 < 2ms
-📌 선택 #5: 통지 패턴 (Notification Pattern)
-문제: 매치 생성 이벤트를 다른 컴포넌트에 어떻게 전달할 것인가?
-후보:
+```
 
-Callback only
+---
 
-cpp   SetMatchCreatedCallback([](const Match& m) { ... });
+### 📌 선택 #5: 통지 패턴 (Notification Pattern)
+
+**문제**: 매치 생성 이벤트를 다른 컴포넌트에 어떻게 전달할 것인가?
+
+**후보**:
+
+**1. Callback only**
+```cpp
+SetMatchCreatedCallback([](const Match& m) { ... });
 
 문제: 동기 실행, 콜백에서 블로킹 시 매칭 지연
 

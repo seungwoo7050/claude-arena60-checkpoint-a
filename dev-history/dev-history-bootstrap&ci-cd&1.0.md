@@ -1,17 +1,24 @@
-Arena60 - 개발 역사: Bootstrap & CI/CD & MVP 1.0
-📋 목차
+# Arena60 - 개발 역사: Bootstrap & CI/CD & MVP 1.0
 
-Bootstrap Phase - 프로젝트 골격
-CI/CD Phase - 자동화 파이프라인
-MVP 1.0 Phase - 게임 서버 구현
-선택의 순간들 (Decision Points)
+## 📋 목차
 
+- Bootstrap Phase - 프로젝트 골격
+- CI/CD Phase - 자동화 파이프라인
+- MVP 1.0 Phase - 게임 서버 구현
+- 선택의 순간들 (Decision Points)
 
-Bootstrap Phase
-🎯 목표
+---
+
+## Bootstrap Phase
+
+### 🎯 목표
+
 빈 저장소에서 빌드 가능한 최소 프로젝트 구조 생성
-📝 파일 생성 순서
-bash# Step 1: 프로젝트 루트 메타데이터
+
+### 📝 파일 생성 순서
+
+```bash
+# Step 1: 프로젝트 루트 메타데이터
 touch README.md
 touch .gitignore
 mkdir .meta && touch .meta/state.yml
@@ -63,8 +70,12 @@ mkdir -p .github/workflows
 cat > .github/workflows/ci.yml << 'EOF'
 # 기본 빌드 스텝만 (vcpkg 설치, cmake, make, ctest)
 EOF
-🔧 실행 명령어
-bash# 로컬 빌드 테스트
+```
+
+### 🔧 실행 명령어
+
+```bash
+# 로컬 빌드 테스트
 cd server
 mkdir build && cd build
 cmake ..
@@ -86,69 +97,80 @@ git commit -m "chore: bootstrap Phase 2 project structure
 - Add Docker Compose infrastructure
 - Setup CMake build system
 - Add placeholder CI workflow"
+```
 
-CI/CD Phase
-🎯 목표
+## CI/CD Phase
+
+### 🎯 목표
+
 프로덕션급 CI/CD 파이프라인 구축 (빌드, 테스트, 린트, 커버리지)
-📌 선택의 순간 #1: 의존성 관리 도구
-문제: C++ 의존성을 어떻게 관리할 것인가?
-후보:
 
-❌ 수동 빌드: boost, protobuf, libpq를 각각 소스에서 컴파일
+### 📌 선택의 순간 #1: 의존성 관리 도구
 
-장점: 완전한 제어
-단점: CI에서 매번 30분+ 소요, 버전 충돌
+**문제**: C++ 의존성을 어떻게 관리할 것인가?
 
+**후보**:
 
-❌ Conan: Python 기반 패키지 매니저
+1. **❌ 수동 빌드**: boost, protobuf, libpq를 각각 소스에서 컴파일
+   - 장점: 완전한 제어
+   - 단점: CI에서 매번 30분+ 소요, 버전 충돌
 
-장점: 바이너리 캐싱
-단점: 한국 게임사 생태계 비주류, 설정 복잡
+2. **❌ Conan**: Python 기반 패키지 매니저
+   - 장점: 바이너리 캐싱
+   - 단점: 한국 게임사 생태계 비주류, 설정 복잡
 
+3. **✅ vcpkg**: Microsoft 공식 C++ 패키지 매니저
+   - 장점: CMake 네이티브 통합, GitHub Actions 캐싱, 한국 게임사에서 실제 사용
+   - 단점: 첫 빌드 느림 (캐시로 해결)
 
-✅ vcpkg: Microsoft 공식 C++ 패키지 매니저
+**최종 선택**: vcpkg (CMake toolchain 방식)
 
-장점: CMake 네이티브 통합, GitHub Actions 캐싱, 한국 게임사에서 실제 사용
-단점: 첫 빌드 느림 (캐시로 해결)
+**이유**:
 
-
-
-최종 선택: vcpkg (CMake toolchain 방식)
-이유:
-cmake# CMakeLists.txt에서 한 줄로 통합
+```cmake
+# CMakeLists.txt에서 한 줄로 통합
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
-📌 선택의 순간 #2: 린팅 도구
-문제: 코드 스타일을 어떻게 강제할 것인가?
-후보:
+```
 
-❌ cpplint: Google 스타일 전용, 너무 엄격
-✅ clang-format: 자동 포맷팅
-✅ clang-tidy: 정적 분석 + 모던 C++ 가이드
+### 📌 선택의 순간 #2: 린팅 도구
 
-최종 선택: clang-format + clang-tidy 조합
-설정:
-yaml# .clang-format
+**문제**: 코드 스타일을 어떻게 강제할 것인가?
+
+**후보**:
+
+- ❌ cpplint: Google 스타일 전용, 너무 엄격
+- ✅ clang-format: 자동 포맷팅
+- ✅ clang-tidy: 정적 분석 + 모던 C++ 가이드
+
+**최종 선택**: clang-format + clang-tidy 조합
+
+**설정**:
+
+```yaml
+# .clang-format
 BasedOnStyle: Google
 IndentWidth: 4      # 선택: 2 vs 4 → 가독성 우선
 ColumnLimit: 100    # 선택: 80 vs 100 → 와이드 모니터 고려
-📌 선택의 순간 #3: 커버리지 도구
-문제: 테스트 커버리지를 어떻게 측정할 것인가?
-후보:
+```
 
-❌ lcov: GNU 전통 도구
+### 📌 선택의 순간 #3: 커버리지 도구
 
-문제: HTML 생성이 복잡, gcovr보다 느림
+**문제**: 테스트 커버리지를 어떻게 측정할 것인가?
 
+**후보**:
 
-✅ gcovr: Python 기반 래퍼
+1. **❌ lcov**: GNU 전통 도구
+   - 문제: HTML 생성이 복잡, gcovr보다 느림
 
-장점: XML/HTML 동시 생성, Cobertura 포맷 지원
+2. **✅ gcovr**: Python 기반 래퍼
+   - 장점: XML/HTML 동시 생성, Cobertura 포맷 지원
 
+**최종 선택**: gcovr + --fail-under-line 70
 
+**구현**:
 
-최종 선택: gcovr + --fail-under-line 70
-구현:
-bash# CI에서 실행
+```bash
+# CI에서 실행
 python3 -m gcovr \
   --object-directory server/build \
   --filter 'server/src' \
@@ -156,8 +178,12 @@ python3 -m gcovr \
   --xml coverage.xml \
   --html-details coverage.html \
   --fail-under-line 70  # 70% 미만이면 빌드 실패
-📝 파일 변경 순서
-bash# Step 1: vcpkg.json 추가 (의존성 선언)
+```
+
+### 📝 파일 변경 순서
+
+```bash
+# Step 1: vcpkg.json 추가 (의존성 선언)
 cat > server/vcpkg.json << 'EOF'
 {
   "dependencies": [
@@ -250,8 +276,12 @@ BasedOnStyle: Google
 IndentWidth: 4
 ColumnLimit: 100
 EOF
-🔧 실행 명령어
-bash# 로컬에서 vcpkg 설치
+```
+
+### 🔧 실행 명령어
+
+```bash
+# 로컬에서 vcpkg 설치
 git clone https://github.com/microsoft/vcpkg.git
 ./vcpkg/bootstrap-vcpkg.sh
 export VCPKG_ROOT=$(pwd)/vcpkg
@@ -279,38 +309,36 @@ git commit -m "ci: implement production-grade CI/CD pipeline
 - Add PostgreSQL/Redis test services
 
 Decision: vcpkg over Conan for better CMake integration"
+```
 
-MVP 1.0 Phase
-🎯 목표
+## MVP 1.0 Phase
+
+### 🎯 목표
+
 60 TPS 게임 루프 + WebSocket 서버 + PostgreSQL 통합
-📌 선택의 순간 #4: 게임 루프 설계
-문제: 어떻게 정확히 60 TPS를 유지하면서 graceful shutdown도 지원할 것인가?
-후보:
 
-❌ Busy-wait 루프: while(true) { if(elapsed > 16ms) tick(); }
+### 📌 선택의 순간 #4: 게임 루프 설계
 
-단점: CPU 100% 사용
+**문제**: 어떻게 정확히 60 TPS를 유지하면서 graceful shutdown도 지원할 것인가?
 
+**후보**:
 
-❌ sleep() 기반: sleep(16ms); tick();
+1. **❌ Busy-wait 루프**: `while(true) { if(elapsed > 16ms) tick(); }`
+   - 단점: CPU 100% 사용
 
-단점: sleep 오버헤드로 jitter 발생
+2. **❌ sleep() 기반**: `sleep(16ms); tick();`
+   - 단점: sleep 오버헤드로 jitter 발생
 
+3. **❌ sleep_until() 스케줄링**: `next_frame += 16.67ms; sleep_until(next_frame);`
+   - 장점: 누적 오차 없음, CPU 효율적
+   - 단점: stop 신호 무시 (종료 시 최대 16ms 대기)
 
-❌ sleep_until() 스케줄링: next_frame += 16.67ms; sleep_until(next_frame);
+4. **✅ condition_variable::wait_for()**: sleep_duration 대기 또는 stop 신호 시 즉시 반환
+   - 장점: Tick rate 정확도 + Graceful shutdown + CPU 효율적
 
-장점: 누적 오차 없음, CPU 효율적
-단점: stop 신호 무시 (종료 시 최대 16ms 대기)
+**최종 선택**: Fixed-step loop with condition_variable
 
-
-✅ condition_variable::wait_for(): sleep_duration 대기 또는 stop 신호 시 즉시 반환
-
-장점: Tick rate 정확도 + Graceful shutdown + CPU 효율적
-
-
-
-최종 선택: Fixed-step loop with condition_variable
-구현 (`server/src/core/game_loop.cpp:126-128`):
+**구현** (`server/src/core/game_loop.cpp:126-128`):
 ```cpp
 void GameLoop::Run() {
     auto next_frame = std::chrono::steady_clock::now();
@@ -357,7 +385,7 @@ void GameLoop::Run() {
 **최종 선택**: 공백 구분 텍스트 (MVP 1.0), Protobuf는 MVP 1.1+에서 고려
 
 **프로토콜**:
-```
+```text
 // Client → Server
 input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y>
 예: input alice 42 1 0 0 0 1.0 0.5
@@ -365,26 +393,28 @@ input <player_id> <seq> <up> <down> <left> <right> <mouse_x> <mouse_y>
 // Server → Client
 state <player_id> <x> <y> <facing_radians> <tick> <delta>
 예: state alice 12.5 8.3 1.57 42 0.01667
-📌 선택의 순간 #6: 데이터베이스 클라이언트
-문제: PostgreSQL과 어떻게 통신할 것인가?
-후보:
+```
 
-❌ libpqxx: C++ 래퍼
+### 📌 선택의 순간 #6: 데이터베이스 클라이언트
 
-장점: RAII, 예외 안전성
-단점: 무거움, 한국 게임사에서 잘 안 씀
+**문제**: PostgreSQL과 어떻게 통신할 것인가?
 
+**후보**:
 
-✅ libpq: PostgreSQL 공식 C API
+1. **❌ libpqxx**: C++ 래퍼
+   - 장점: RAII, 예외 안전성
+   - 단점: 무거움, 한국 게임사에서 잘 안 씀
 
-장점: 가볍고 빠름, 직접 제어
-단점: 수동 메모리 관리
+2. **✅ libpq**: PostgreSQL 공식 C API
+   - 장점: 가볍고 빠름, 직접 제어
+   - 단점: 수동 메모리 관리
 
+**최종 선택**: libpq + RAII 래퍼 직접 구현
 
+**구현**:
 
-최종 선택: libpq + RAII 래퍼 직접 구현
-구현:
-cppclass PostgresStorage {
+```cpp
+class PostgresStorage {
     struct ConnDeleter {
         void operator()(PGconn* conn) const noexcept {
             if (conn) PQfinish(conn);
@@ -392,8 +422,12 @@ cppclass PostgresStorage {
     };
     std::unique_ptr<PGconn, ConnDeleter> connection_;  // RAII로 안전성 확보
 };
-📝 파일 생성 순서 (상세)
-bash# ========================================
+```
+
+### 📝 파일 생성 순서 (상세)
+
+```bash
+# ========================================
 # Phase 1: 도메인 모델 헤더 (테스트 주도)
 # ========================================
 
@@ -883,7 +917,7 @@ Closes #1"
 ---
 
 ## 전체 타임라인 요약
-```
+```text
 Bootstrap (1일)
 ├─ 프로젝트 구조 생성
 ├─ Docker Compose 인프라
@@ -903,13 +937,16 @@ MVP 1.0 (5-7일)
 └─ 증거 수집 (1일)
 
 총 8-10일 (실제 개발 시간, 1인 기준)
+```
 
-🎓 핵심 교훈
+---
 
-vcpkg는 CMake 프로젝트의 게임 체인저 - 의존성 지옥 해결
-Fixed-step 게임 루프는 정밀 타이밍의 기본 - sleep_until 사용
-텍스트 프로토콜로 시작, 나중에 최적화 - 디버깅 > 효율
-libpq로 충분, ORM 불필요 - 게임 서버는 단순 쿼리만
-테스트 커버리지 70%는 현실적 - 100% 목표는 비효율
+## 🎓 핵심 교훈
 
-이 순서대로 따라하면 100% 재현 가능합니다. 🚀
+- vcpkg는 CMake 프로젝트의 게임 체인저 - 의존성 지옥 해결
+- Fixed-step 게임 루프는 정밀 타이밍의 기본 - sleep_until 사용
+- 텍스트 프로토콜로 시작, 나중에 최적화 - 디버깅 > 효율
+- libpq로 충분, ORM 불필요 - 게임 서버는 단순 쿼리만
+- 테스트 커버리지 70%는 현실적 - 100% 목표는 비효율
+
+**이 순서대로 따라하면 100% 재현 가능합니다. 🚀**
